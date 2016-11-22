@@ -36,9 +36,7 @@ class Models(object):
 	self.add_recording_to_train()
         # self.remove_zeros() # does this cause a reduction in the score?
         self.tt_split()
-        self.normalize()
-        self.oversample() # Still need to write
-	self.make_dummies() # Still need to write
+        self.normalize_and_add_dummies()
 	print '-------- Tranformation Complete --------'
 
     def fit(self):
@@ -97,21 +95,25 @@ class Models(object):
 	self.data = self.data[result]
 	print 'Dimensions after performing remove_zeros(): {}'.format(self.data.shape)
 
-    def normalize(self):
+    def normalize_and_add_dummies(self):
 	'''
 	INPUT: None
 	OUTPUT: None, normalizes both training and test data by subtracting the mean and dividing by the std
+		Also adds dummies for patient number
 	'''
-	self.X_train = (self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0)
-	self.X_test = (self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0)
-	test_set = (self.test_set[:,:-1] - self.test_set[:,:-1].mean(axis=0)) / self.test_set[:,:-1].std(axis=0)
-	self.test_set = np.concatenate([test_set, np.array(self.test_set[:,-1]).reshape(-1,1)], axis=1)
+	X_train_patient = self.X_train[:,-1]
+	X_test_patient = self.X_test[:,-1]
+	test_set_patient = self.test_set[:,-1]
 
-    def oversample(self):
-	pass
+	self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
+	self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
+	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
 
-    def make_dummies(self):
-	pass
+	self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
+	self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
+	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+	
+	print 'Normalization and dummy adding complete'
 
     def logistic_regression(self):
         model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
@@ -299,8 +301,8 @@ if __name__ == '__main__':
     c_test = pd.read_csv('data/c_test_reduced13.csv').sort_values(by='618').drop('618', axis=1)
     test_concat = np.concatenate([a_test, b_test, c_test])
 
-    combined_model = Models('combined', df_concat, test_concat)
-    combined_model.fit()
+    cm = Models('combined', df_concat, test_concat)
+    cm.fit()
 
 
     #combined_combine_predictions(combined_model.create_final_prediction(combined_model.models[0]), 'data/prediction16.csv')
