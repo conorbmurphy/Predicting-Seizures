@@ -25,6 +25,7 @@ class Models(object):
         self.y_test = None
         self.models = []
         self.model_scores = []
+	self.predictions = []
 	self.transform()
 
     def transform(self):
@@ -33,7 +34,7 @@ class Models(object):
 	'''
 	print '-------- Beginning Transformation --------'
 	self.add_recording_to_train()
-        self.remove_zeros() # does this cause a reduction in the score?
+        # self.remove_zeros() # does this cause a reduction in the score?
         self.tt_split()
         self.normalize()
         self.oversample() # Still need to write
@@ -115,38 +116,48 @@ class Models(object):
     def logistic_regression(self):
         model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
         model.fit(self.X_train, self.y_train)
-        score = self._score(self.y_test, model.predict_proba(self.X_test)[:,1])
+
+	prediction = model.predict_proba(self.X_test)[:,1]
+        score = self._score(self.y_test, prediction)
         print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
+
         self.model_scores.append(score)
         self.models.append(model)
+	self.predictions.append(prediction)
 
     def random_forest(self):
-        model = RandomForestClassifier(n_estimators=5000, n_jobs=-1)
+        model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
         model.fit(self.X_train, self.y_train)
-	score = self._score(self.y_test, model.predict(self.X_test))
+
+	prediction = model.predict_proba(self.X_test)[:,1]
+	score = self._score(self.y_test, prediction)
         print 'Score for Random Forest for patient {}: {}'.format(self.patient, score)
+
 	self.model_scores.append(score)
    	self.models.append(model)
+	self.predictions.append(prediction)
 
     def xgb_static(self):
         dtrain = xgb.DMatrix(self.X_train, self.y_train)
         dtest =  xgb.DMatrix(self.X_test)
-
         param = {'max_depth':5, 
 		'eta':.2, # step shrink size
 		'silent':1, 
 		'objective':'binary:logistic', 
 		'subsample':.9, 
 		'booster': 'gbtree',
-		'eval_metric': 'auc'}
+		'eval_metric': 'auc',
+		'scale_pos_weight':12.45} # chose clase weight from sum negative class over sum of positive class
         num_round = 750
-        bst = xgb.train(param, dtrain, num_round)
+        model = xgb.train(param, dtrain, num_round)
 
-        preds = bst.predict(dtest)
-        score = self._score(self.y_test, preds)
+        prediction = model.predict(dtest)
+        score = self._score(self.y_test, prediction)
         print 'Score for XGB for patient {}: {}'.format(self.patient, score)
-        self.models.append(bst)
+
+        self.models.append(model)
         self.model_scores.append(score)
+	self.predictions.append(prediction)
 
     def xgb_grid_search(self):
         cv_params = {'max_depth': [1, 2, 3, 5, 7],
@@ -176,13 +187,16 @@ class Models(object):
     def svm_static(self):
         y_train = (self.y_train * 2) - 1
 	y_test = (self.y_test * 2) - 1
-	
-	model = svm.SVC(kernel='rbf', C=1, probability=True)
+	model = svm.SVC(kernel='rbf', C=1, probability=True, class_weight='balanced')
 	model.fit(self.X_train, y_train)
 	
 	prediction = model.predict(self.X_test)
-	print "Score for SVM for patient {}: {}".format(self.patient, self._score(y_test, prediction))
+	score = self._score(y_test, prediction)
+	print "Score for SVM for patient {}: {}".format(self.patient, score)
+
 	self.models.append(model)
+	self.model_scores.append(score)
+	self.predictions.append(prediction)
 
     def _score(self, y_true, y_pred):
 	'''
