@@ -41,11 +41,11 @@ class Models(object):
 	print '-------- Tranformation Complete --------'
 
     def fit(self):
-	#self.logistic_regression()
+	self.logistic_regression()
         self.random_forest()
         self.xgb_static()
         #self.xgb_grid_search()
-	#self.svm_static()
+	self.svm_static()
 
     def add_recording_to_train(self):
         '''
@@ -113,20 +113,20 @@ class Models(object):
 	pass
 
     def logistic_regression(self):
-        self.model = LogisticRegression()
-        self.model.fit(self.X_train, self.y_train)
-        score = self._score(self.model.predict(self.X_test), self.y_test)
+        model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
+        model.fit(self.X_train, self.y_train)
+        score = self._score(self.y_test, model.predict_proba(self.X_test)[:,1])
         print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
         self.model_scores.append(score)
-        self.models.append(self.model)
+        self.models.append(model)
 
     def random_forest(self):
-        self.model = RandomForestClassifier(n_estimators=5000, n_jobs=-1)
-        self.model.fit(self.X_train, self.y_train)
-	score = self._score(self.model.predict(self.X_test), self.y_test)
+        model = RandomForestClassifier(n_estimators=5000, n_jobs=-1)
+        model.fit(self.X_train, self.y_train)
+	score = self._score(self.y_test, model.predict(self.X_test))
         print 'Score for Random Forest for patient {}: {}'.format(self.patient, score)
 	self.model_scores.append(score)
-   	self.models.append(self.model)
+   	self.models.append(model)
 
     def xgb_static(self):
         dtrain = xgb.DMatrix(self.X_train, self.y_train)
@@ -177,18 +177,22 @@ class Models(object):
         y_train = (self.y_train * 2) - 1
 	y_test = (self.y_test * 2) - 1
 	
-	model = svm.SVC(kernel='rbf', C=1)
+	model = svm.SVC(kernel='rbf', C=1, probability=True)
 	model.fit(self.X_train, y_train)
 	
 	prediction = model.predict(self.X_test)
-	print "Score for SVM for patient {}: {}".format(self.patient, self._score(prediction, y_test))
+	print "Score for SVM for patient {}: {}".format(self.patient, self._score(y_test, prediction))
 	self.models.append(model)
 
     def _score(self, y_true, y_pred):
+	'''
+	INPUT: true and predicted values
+	OUTPUT: ROC area under the curve (returns None in case of ValueError)
+	'''
         try: 
 		return roc_auc_score(y_true, y_pred)
 	except ValueError:
-		print 'Only one class present'
+		print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
 
     # def plot_ROC(self, models):
     #     plt.figure()
