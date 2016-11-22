@@ -26,6 +26,7 @@ class Models(object):
         self.models = []
         self.model_scores = []
 	self.predictions = []
+	self.predictions_test_set = []
 	self.transform()
 
     def transform(self):
@@ -127,6 +128,8 @@ class Models(object):
         self.models.append(model)
 	self.predictions.append(prediction)
 
+	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+
     def random_forest(self):
         model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
         model.fit(self.X_train, self.y_train)
@@ -138,6 +141,8 @@ class Models(object):
 	self.model_scores.append(score)
    	self.models.append(model)
 	self.predictions.append(prediction)
+
+	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def xgb_static(self):
         dtrain = xgb.DMatrix(self.X_train, self.y_train)
@@ -160,6 +165,9 @@ class Models(object):
         self.models.append(model)
         self.model_scores.append(score)
 	self.predictions.append(prediction)
+	
+	test_set = xgb.DMatrix(self.test_set)
+	self.predictions_test_set.append(model.predict(test_set))
 
     def xgb_grid_search(self):
         cv_params = {'max_depth': [1, 2, 3, 5, 7],
@@ -192,13 +200,28 @@ class Models(object):
 	model = svm.SVC(kernel='rbf', C=1, probability=True, class_weight='balanced')
 	model.fit(self.X_train, y_train)
 	
-	prediction = model.predict(self.X_test)
+	prediction = model.predict_proba(self.X_test)[:,1]
 	score = self._score(y_test, prediction)
 	print "Score for SVM for patient {}: {}".format(self.patient, score)
 
 	self.models.append(model)
 	self.model_scores.append(score)
 	self.predictions.append(prediction)
+
+	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+
+    def svm_grid_search(self):
+        y_train = (self.y_train * 2) - 1
+        y_test = (self.y_test * 2) - 1
+	model = svm.SVC(kernel='rbf', probability=True, class_weight='balanced', verbose=1)
+
+	params = {'C':[.001,.01, .1, 1, 10, 100, 1000],
+		'gamma':[.01, .1, 1, 10]}
+	model_gs = GridSearchCV(model, params, cv=5, scoring='roc_auc', n_jobs=-1)
+
+	print '------- Fitting SVM GridSearchCV -------'
+	model_gs.fit(self.X_train, y_train)
+	print 'Best model found has a score of {} with the parameters {}'.format(model_gs.best_score_, model_gs.best_params_)
 
     def _score(self, y_true, y_pred):
 	'''
@@ -258,7 +281,7 @@ class Models(object):
 
 
 
-def combine_predictions(predict_a, predict_b, predict_c, file_name):
+def combine_predictions_by_patient(predict_a, predict_b, predict_c, file_name):
     '''
     INPUT: predictions from three patients
     OUTPUT: None, saves to csv
@@ -274,12 +297,28 @@ def combine_predictions(predict_a, predict_b, predict_c, file_name):
     prediction_df.to_csv(file_name, index=False)
     print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
 
-def combined_combine_predictions(predict_a, file_name):
+def combine_predictions_with_combined_patients(predict_a, file_name):
     '''
     INPUT: predictions from combined patients
     OUTPUT: None, saves to csv
     '''
     prediction = predict_a
+    files = []
+    for directory in ['test_1_new', 'test_2_new', 'test_3_new']:
+        file_list = listdir('/data/'+directory)
+        file_list = sorted(file_list, key=lambda num: int(num.replace('.',
+            '_').split('_')[2]))
+        [files.append(file) for file in file_list]
+    prediction_df = pd.DataFrame({'File': files, 'Class': prediction}, columns = ['File', 'Class'])
+    prediction_df.to_csv(file_name, index=False)
+    print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
+
+def combine_predictions_ensemble(predict_a, file_name):
+    '''
+    INPUT: an ensemble method for predictions from combined patients
+    OUTPUT: None, saves to csv
+    '''
+    prediction = np.array(predict_a).mean(axis=0)
     files = []
     for directory in ['test_1_new', 'test_2_new', 'test_3_new']:
         file_list = listdir('/data/'+directory)
@@ -303,6 +342,7 @@ if __name__ == '__main__':
 
     cm = Models('combined', df_concat, test_concat)
     cm.fit()
+    combine_predictions_ensemble(cm.predictions_test_set, 'data/prediction17.csv')
 
 
     #combined_combine_predictions(combined_model.create_final_prediction(combined_model.models[0]), 'data/prediction16.csv')
