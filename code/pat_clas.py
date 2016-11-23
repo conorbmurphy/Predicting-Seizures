@@ -280,6 +280,7 @@ def reduce_one_file(file_name):
     if patient == 'new': # in case of test data
          patient, id = file_name.replace('.', '_').replace('/','_').split('_')[6:8]
 	 clas = None
+
     start = 0
     result = np.array([])
     for segment in xrange(24000, 264000, 24000):
@@ -294,16 +295,10 @@ def reduce_one_file(file_name):
         start = segment+1
 
     result2 = np.array([])
-#    cwp = np.array([])
     for i in range(16):
         cwtavg = signal.cwt(temp_mat[:,i], signal.ricker, np.linspace(50, 500, 20, endpoint=False))
         result2 = np.concatenate([result2, (cwtavg**2).mean(axis=1)])
-#	if cwp.shape[0] == 0:
-#		cwp = cwtavg
-#	else:
-#		cwp = np.concatenate([cwp, cwtavg])
-#    file_path = '/data2/cwt/'+file_name.split('/')[-1][:-4]
-#    np.save(file_path, cwp) # saving the analysis
+
     result = np.append(result, result2)
 
     result = np.append(result, kurtosis(temp_mat)) # adds kurtosis for each channel 
