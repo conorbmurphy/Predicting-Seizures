@@ -76,9 +76,9 @@ class Models(object):
     	This function saves the indexes for test and training set, making
             sure that they are separated by group
         '''
-        self.y = self.data.pop(self.data.columns[-1])
+        self.y = np.array(self.data.pop(self.data.columns[-1]))
         self.X_train, self.X_test, self.y_train, self.y_test = \
-               train_test_split(self.data, self.y, test_size=0.4)
+               train_test_split(np.array(self.data), self.y, test_size=0.4)
         print '-------- Train/Test Split Complete --------'
 	# group_kfold = GroupKFold(n_splits=3)
 	# self.y = np.array(self.data.pop(self.data.columns[-1]))
