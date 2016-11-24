@@ -1,5 +1,5 @@
-# Predicting Seizures using Long-term iEEG Recordings
-## By Conor B. Murphy
+# Predicting Seizures using Long-Term iEEG Recordings
+### By Conor B. Murphy
 
 ## Summary
 

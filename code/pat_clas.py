@@ -270,41 +270,48 @@ def create_reduced_4():
 
     print 'Create reduced training files complete'
 
+label = pd.read_csv('/data/train_and_test_data_labels_safe.csv') 
+label = list(label[label['safe'] == 0]['image']) # list of contaminated files
+
 def reduce_one_file(file_name):
     '''
     Reuces one test or train recording by file name
     '''
     print 'Fitting {}'.format(file_name)
-    temp_mat = loadmat(file_name)['dataStruct'][0][0][0]
+    temp_mat = loadmat(file_name)['dataStruct'][0][0]
     patient, id, clas = file_name.replace('.', '_').replace('/','_').split('_')[4:7]
+    contaminated = file_name.split('/')[-1] in label
     if patient == 'new': # in case of test data
          patient, id = file_name.replace('.', '_').replace('/','_').split('_')[6:8]
 	 clas = None
+    else:
+	 sequence = temp_mat[4][0][0] # pulls sequence number (only exists in training set)
 
     start = 0
-    result = np.array([])
+    result1 = np.array([])
     for segment in xrange(24000, 264000, 24000):
-        subset = temp_mat[start:segment,:]
+        subset = temp_mat[0][start:segment,:]
         subset = subset[np.all(subset, axis=1)]
         if len(subset) > 0:
-            result = np.append(result, subset.mean(axis=0))
+            result1 = np.append(result1, subset.mean(axis=0))
         elif len(result) > 0:
-            result = np.append(result, result[-16:])
+            result1 = np.append(result1, result1[-16:])
         else:
-            result = np.append(result, np.zeros(16))
+            result1 = np.append(result1, np.zeros(16))
         start = segment+1
+    result1 = result1.reshape(1,-1)
 
     result2 = np.array([])
     for i in range(16):
-        cwtavg = signal.cwt(temp_mat[:,i], signal.ricker, np.linspace(50, 500, 20, endpoint=False))
+        cwtavg = signal.cwt(temp_mat[0][:,i], signal.ricker, np.linspace(50, 500, 20, endpoint=False))
         result2 = np.concatenate([result2, (cwtavg**2).mean(axis=1)])
+    result2 = result2.reshape(1,-1)
+    #result = np.append(result, result2)
 
-    result = np.append(result, result2)
+    result3 = kurtosis(temp_mat[0]).reshape(1,-1) # adds kurtosis for each channel 
+    result4 = skew(temp_mat[0]).reshape(1,-1) # adds skew for each channel
 
-    result = np.append(result, kurtosis(temp_mat)) # adds kurtosis for each channel 
-    result = np.append(result, skew(temp_mat)) # adds skew for each channel
-
-    temp_mat2 = temp_mat[np.all(temp_mat, axis=1)]
+    temp_mat2 = temp_mat[0][np.all(temp_mat[0], axis=1)]
     if temp_mat2.shape[0] > 0:
         arith_mean_channel = temp_mat2.mean(axis=0)
         arith_mean_total = temp_mat2.mean()
@@ -339,17 +346,24 @@ def reduce_one_file(file_name):
                         min_total,
                         median_channel,
                         median_total,
+			np.array(correlations),
                         corr_mean,
                         corr_var]).flat).reshape(1,-1)
     else:
         result_mom = np.zeros(105).reshape(1, 105)
 
-    result = np.append(result, result_mom)
+    #result = np.append(result, result_mom)
+
+    # result = np.concatenate([result1, result2, result3, result4, result_mom])
 
     if clas:
-        result = np.append(result, np.array([patient, id, clas]))
+	result = np.concatenate([result1, result2, result3, result4, result_mom, 
+			np.array([patient, id, sequence, contaminated, clas]).reshape(1,-1)], axis=1)
+        #result = np.append(result, np.array([patient, id, sequence, clas]))
     else:
-        result = np.append(result, np.array([patient, id]))
+        result = np.concatenate([result1, result2, result3, result4, result_mom,
+                        np.array([patient, id]).reshape(1,-1)], axis=1)
+        #result = np.append(result, np.array([patient, id]))
     return result.flatten().reshape(1,-1)
 
 
@@ -428,4 +442,5 @@ if __name__ == '__main__':
     # 
     # reduce_parallel2()
     # create_reduced_4() # removes zeros
-    pull_recording_num_pool()
+    #pull_recording_num_pool()
+    pass
