@@ -148,7 +148,6 @@ class Models(object):
     	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
 
 
-
     def logistic_regression(self):
     	# for train_index, test_index in zip(self.train_indexes, self.test_indexes):
         #     	model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
@@ -166,8 +165,8 @@ class Models(object):
         model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
         model.fit(self.X_train, self.y_train)
 
-    	prediction = model.predict_proba(self.X[test_index])[:,1]
-    	score = self._score(self.y[test_index], prediction)
+    	prediction = model.predict_proba(self.X_test)[:,1]
+    	score = self._score(self.y_test, prediction)
         print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
 
     	self.model_scores.append(score)
