@@ -8,7 +8,7 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 import multiprocessing
 from scipy import signal
-from scipy.stats import kurtosis, skew, pearsonr
+from scipy.stats import kurtosis, skew, pearsonr, entropy
 from itertools import combinations
 
 class Patient(object):
@@ -294,7 +294,7 @@ def reduce_one_file(file_name):
         subset = subset[np.all(subset, axis=1)]
         if len(subset) > 0:
             result1 = np.append(result1, subset.mean(axis=0))
-        elif len(result) > 0:
+        elif len(result1) > 0:
             result1 = np.append(result1, result1[-16:])
         else:
             result1 = np.append(result1, np.zeros(16))
@@ -326,6 +326,7 @@ def reduce_one_file(file_name):
         min_total = temp_mat2.min()
         median_channel = np.median(temp_mat2, axis=0)
         median_total = np.median(temp_mat2)
+	#ent = entropy(np.abs(temp_mat2))
 
         correlations = []
         for c in combinations(range(16), 2):
@@ -346,37 +347,41 @@ def reduce_one_file(file_name):
                         min_total,
                         median_channel,
                         median_total,
+			#ent,
 			np.array(correlations),
                         corr_mean,
                         corr_var]).flat).reshape(1,-1)
     else:
-        result_mom = np.zeros(105).reshape(1, 105)
+        result_mom = np.zeros(225).reshape(1, -1) # BE CAREFUL WITH THIS
 
     #result = np.append(result, result_mom)
 
     # result = np.concatenate([result1, result2, result3, result4, result_mom])
-
-    if clas:
-	result = np.concatenate([result1, result2, result3, result4, result_mom, 
+    try:
+    	if clas:
+		result = np.concatenate([result1, result2, result3, result4, result_mom, 
 			np.array([patient, id, sequence, contaminated, clas]).reshape(1,-1)], axis=1)
         #result = np.append(result, np.array([patient, id, sequence, clas]))
-    else:
-        result = np.concatenate([result1, result2, result3, result4, result_mom,
+    	else:
+        	result = np.concatenate([result1, result2, result3, result4, result_mom,
                         np.array([patient, id]).reshape(1,-1)], axis=1)
         #result = np.append(result, np.array([patient, id]))
-    return result.flatten().reshape(1,-1)
+    	return result.flatten().reshape(1,-1)
+    except ValueError:
+	print 'Unable to process {} due to ValueError, returning negative ones.'.format(file_name)
+	return np.ones(742)*-1
 
 
 def reduce_parallel2():
     '''
     to run on aws, change pool and paths
     '''
-    params = [('1', '/data/train_1', 'train', 'data/a_reduced13.csv'),
-            ('2', '/data/train_2', 'train', 'data/b_reduced13.csv'),
-            ('3', '/data/train_3', 'train', 'data/c_reduced13.csv'),
-            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced13.csv'),
-            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced13.csv'),
-            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced13.csv')]
+    params = [('1', '/data/train_1', 'train', 'data/a_reduced15.csv'),
+            ('2', '/data/train_2', 'train', 'data/b_reduced15.csv'),
+            ('3', '/data/train_3', 'train', 'data/c_reduced15.csv'),
+            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced15.csv'),
+            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced15.csv'),
+            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced15.csv')]
     files = [listdir(param[1]) for param in params]
     files[0].remove('1_45_1.mat') # removes corrupt file
     paths = [param[1] for param in params]
@@ -440,7 +445,6 @@ if __name__ == '__main__':
     # c_test._save_reduce('data/c_test_reduced3.csv')
     # reduce_parallel()
     # 
-    # reduce_parallel2()
+    reduce_parallel2()
     # create_reduced_4() # removes zeros
     #pull_recording_num_pool()
-    pass
