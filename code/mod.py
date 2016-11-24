@@ -363,26 +363,30 @@ def combine_predictions_ensemble(predict_a, file_name):
     print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
 
 if __name__ == '__main__':
-    a_df = pd.read_csv('data/a_reduced13.csv')
-    b_df = pd.read_csv('data/b_reduced13.csv')
-    c_df = pd.read_csv('data/c_reduced13.csv')
-    df_concat = pd.concat([a_df, b_df, c_df]).reset_index(drop=True)
+    a_df = pd.read_csv('data/a_reduced15.csv')
+    b_df = pd.read_csv('data/b_reduced15.csv')
+    c_df = pd.read_csv('data/c_reduced15.csv')
+    df_concat = pd.concat([\
+		a_df[a_df['740'] == False].drop(['738', '739', '740'], axis=1), 
+		b_df[b_df['740'] == False].drop(['738', '739', '740'], axis=1), 
+		c_df[c_df['740'] == False].drop(['738', '739', '740'], axis=1)])\
+			.reset_index(drop=True)
 
-    a_test = pd.read_csv('data/a_test_reduced13.csv').sort_values(by='618').drop('618', axis=1)
-    b_test = pd.read_csv('data/b_test_reduced13.csv').sort_values(by='618').drop('618', axis=1)
-    c_test = pd.read_csv('data/c_test_reduced13.csv').sort_values(by='618').drop('618', axis=1)
+    a_test = pd.read_csv('data/a_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
+    b_test = pd.read_csv('data/b_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
+    c_test = pd.read_csv('data/c_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
     test_concat = np.concatenate([a_test, b_test, c_test])
 
     cm = Models('combined', df_concat, test_concat)
     cm.fit()
-    combine_predictions_ensemble(cm.predictions_test_set[0], 'data/prediction19.csv')
+    combine_predictions_ensemble(cm.predictions_test_set[0], 'data/prediction20.csv')
 
 
     #combined_combine_predictions(combined_model.create_final_prediction(combined_model.models[0]), 'data/prediction16.csv')
    
     #combine_predictions(model_a.create_final_prediction(model_a.models[0], a_test),
     #                    model_b.create_final_prediction(model_b.models[0], b_test),
-    #                    model_c.create_final_prediction(model_c.models[0], c_test),
+   #                    model_c.create_final_prediction(model_c.models[0], c_test),
     #                    'data/prediction11.csv')
     #pred = pd.read_csv('data/prediction11.csv')
 
