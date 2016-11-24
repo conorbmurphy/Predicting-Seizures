@@ -276,9 +276,9 @@ class Models(object):
     	OUTPUT: ROC area under the curve (returns None in case of ValueError)
     	'''
         try:
-		    return roc_auc_score(y_true, y_pred)
-	    except ValueError:
-		    print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
+            return roc_auc_score(y_true, y_pred)
+        except ValueError:
+            print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
 
     # def plot_ROC(self, models):
     #     plt.figure()
