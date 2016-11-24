@@ -16,6 +16,10 @@ from sklearn import svm
 
 class Models(object):
     def __init__(self, patient, data, test_set):
+        '''
+        Assigns variables for patient, training and test set including the
+            basic transformations to begin modeling
+        '''
     	self.patient = patient
         self.data = data
     	self.test_set = test_set
@@ -23,8 +27,6 @@ class Models(object):
     	self.X = None
     	self.y = None
 
-    	#self.train_indexes = [] # Remove?
-    	#self.test_indexes = []
     	self.X_train = None
         self.y_train = None
         self.X_test = None
@@ -47,20 +49,27 @@ class Models(object):
             4) removing zeros (if helpful)
     	'''
     	print '-------- Beginning Transformation --------'
-    	# self.add_groups() # No longer needed - part of feature building
+        self.remove_zeros() # does this cause a reduction in the score?
     	self.tt_split()
     	self.normalize_and_add_dummies()
-            # self.remove_zeros() # does this cause a reduction in the score?
     	print '-------- Tranformation Complete --------'
 
-    def fit(self):
-	self.logistic_regression()
-	#self.logistic_regression()
-        #self.random_forest()
-        #self.xgb_static()
-        #self.xgb_grid_search()
-	#self.svm_static()
-	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
+
+    def remove_zeros(self):
+    	'''
+    	INPUT: None
+    	OUTPUT: None, updates self.data
+    	Looks over the first 160 columns of self.data (the channel means) and removes all rows with all zeros
+    	'''
+    	print 'Dimensions before starting remove_zeros(): {}'.format(self.data.shape)
+    	result = []
+    	for row in self.data.iterrows():
+    		result.append(all(row[1][:160] == 0))
+    	result[:] = [not x for x in result]
+    	self.data = self.data[result]
+    	print 'Dimensions after performing remove_zeros(): {}'.format(self.data.shape)
+        print '-------- Removing Zeros Complete --------'
+
 
     def tt_split(self):
         '''
@@ -98,77 +107,89 @@ class Models(object):
     	# self.X_train = self.X_train[:,:-1] # dropping recording number
     	# self.X_test = self.X_test[:,:-1]
 
-    def remove_zeros(self):
-	'''
-	INPUT: None
-	OUTPUT: None, updates self.data
-	Looks over the first 160 columns of self.data (the channel means) and removes all rows with all zeros
-	'''
-	print 'Dimensions before starting remove_zeros(): {}'.format(self.data.shape)
-	result = []
-	for row in self.data.iterrows():
-		result.append(all(row[1][:160] == 0))
-	result[:] = [not x for x in result]
-	self.data = self.data[result]
-	print 'Dimensions after performing remove_zeros(): {}'.format(self.data.shape)
-    print '-------- Removing Zeros Complete --------'
 
     def normalize_and_add_dummies(self):
-	'''
-	INPUT: None
-	OUTPUT: None, normalizes both training and test data by subtracting the mean and dividing by the std
-		Also adds dummies for patient number
-	'''
-	X_patient = self.X[:,-1]
-	test_set_patient = self.test_set[:,-1]
+    	'''
+    	INPUT: None
+    	OUTPUT: None
+            Normalizes both training and test data by subtracting the mean and
+                dividing by the std. Also adds dummies for patient number
+    	'''
+    	X_patient = self.X[:,-1]
+    	test_set_patient = self.test_set[:,-1]
 
-	self.X = ((self.X - self.X.mean(axis=0)) / self.X.std(axis=0))[:,:-1]
-	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
+    	self.X = ((self.X - self.X.mean(axis=0)) / self.X.std(axis=0))[:,:-1]
+    	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
 
-	self.X = np.concatenate([self.X, pd.get_dummies(X_patient)], axis=1)
-	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+    	self.X = np.concatenate([self.X, pd.get_dummies(X_patient)], axis=1)
+    	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
 
-	#X_train_patient = self.X_train[:,-1]
-	#X_test_patient = self.X_test[:,-1]
-	#test_set_patient = self.test_set[:,-1]
+    	#X_train_patient = self.X_train[:,-1]
+    	#X_test_patient = self.X_test[:,-1]
+    	#test_set_patient = self.test_set[:,-1]
 
-	#self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
-	#self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
-	#self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
+    	#self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
+    	#self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
+    	#self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
 
-	#self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
-	#self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
-	#self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
-    print '-------- Normalization and Dummy Adding Complete --------'
+    	#self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
+    	#self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
+    	#self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+        print '-------- Normalization and Dummy Adding Complete --------'
+
+
+    def fit(self):
+    	self.logistic_regression()
+    	#self.logistic_regression()
+        #self.random_forest()
+        #self.xgb_static()
+        #self.xgb_grid_search()
+    	#self.svm_static()
+    	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
+
+
 
     def logistic_regression(self):
-	for train_index, test_index in zip(self.train_indexes, self.test_indexes):
-        	model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
-        	model.fit(self.X[train_index], self.y[train_index])
+    	# for train_index, test_index in zip(self.train_indexes, self.test_indexes):
+        #     	model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
+        #     	model.fit(self.X[train_index], self.y[train_index])
+        #
+    	# 	          prediction = model.predict_proba(self.X[test_index])[:,1]
+    	#         score = self._score(self.y[test_index], prediction)
+        #     	print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
+        #
+    	#         self.model_scores.append(score)
+        #     	self.models.append(model)
+    	# 	self.predictions.append(prediction)
+        #
+    	# 	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+        model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
+        model.fit(self.X_train, self.y_train)
 
-		prediction = model.predict_proba(self.X[test_index])[:,1]
-	        score = self._score(self.y[test_index], prediction)
-        	print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
+    	prediction = model.predict_proba(self.X[test_index])[:,1]
+    	score = self._score(self.y[test_index], prediction)
+        print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
 
-	        self.model_scores.append(score)
-        	self.models.append(model)
-		self.predictions.append(prediction)
+    	self.model_scores.append(score)
+        self.models.append(model)
+    	self.predictions.append(prediction)
 
-		self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+
 
     def random_forest(self):
         model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
         model.fit(self.X_train, self.y_train)
 
-	prediction = model.predict_proba(self.X_test)[:,1]
-	score = self._score(self.y_test, prediction)
+    	prediction = model.predict_proba(self.X_test)[:,1]
+    	score = self._score(self.y_test, prediction)
         print 'Score for Random Forest for patient {}: {}'.format(self.patient, score)
 
-	self.model_scores.append(score)
-   	self.models.append(model)
-	self.predictions.append(prediction)
+    	self.model_scores.append(score)
+       	self.models.append(model)
+    	self.predictions.append(prediction)
 
-	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def xgb_static(self):
         dtrain = xgb.DMatrix(self.X_train, self.y_train)
@@ -190,10 +211,10 @@ class Models(object):
 
         self.models.append(model)
         self.model_scores.append(score)
-	self.predictions.append(prediction)
+    	self.predictions.append(prediction)
 
-	test_set = xgb.DMatrix(self.test_set)
-	self.predictions_test_set.append(model.predict(test_set))
+    	test_set = xgb.DMatrix(self.test_set)
+    	self.predictions_test_set.append(model.predict(test_set))
 
     def xgb_grid_search(self):
         cv_params = {'max_depth': [1, 2, 3, 5, 7],
@@ -222,42 +243,42 @@ class Models(object):
 
     def svm_static(self):
         y_train = (self.y_train * 2) - 1
-	y_test = (self.y_test * 2) - 1
-	model = svm.SVC(kernel='rbf', C=1, gamma=.01, probability=True, class_weight='balanced')
-	model.fit(self.X_train, y_train)
+    	y_test = (self.y_test * 2) - 1
+    	model = svm.SVC(kernel='rbf', C=1, gamma=.01, probability=True, class_weight='balanced')
+    	model.fit(self.X_train, y_train)
 
-	prediction = model.predict_proba(self.X_test)[:,1]
-	score = self._score(y_test, prediction)
-	print "Score for SVM for patient {}: {}".format(self.patient, score)
+    	prediction = model.predict_proba(self.X_test)[:,1]
+    	score = self._score(y_test, prediction)
+    	print "Score for SVM for patient {}: {}".format(self.patient, score)
 
-	self.models.append(model)
-	self.model_scores.append(score)
-	self.predictions.append(prediction)
+    	self.models.append(model)
+    	self.model_scores.append(score)
+    	self.predictions.append(prediction)
 
-	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def svm_grid_search(self):
         y_train = (self.y_train * 2) - 1
         y_test = (self.y_test * 2) - 1
-	model = svm.SVC(kernel='rbf', probability=True, class_weight='balanced', verbose=1)
+    	model = svm.SVC(kernel='rbf', probability=True, class_weight='balanced', verbose=1)
 
-	params = {'C':[.001,.01, .1, 1, 10, 100, 1000],
-		'gamma':[.01, .1, 1, 10]}
-	model_gs = GridSearchCV(model, params, cv=5, scoring='roc_auc', n_jobs=-1)
+    	params = {'C':[.001,.01, .1, 1, 10, 100, 1000],
+    		'gamma':[.01, .1, 1, 10]}
+    	model_gs = GridSearchCV(model, params, cv=5, scoring='roc_auc', n_jobs=-1)
 
-	print '------- Fitting SVM GridSearchCV -------'
-	model_gs.fit(self.X_train, y_train)
-	print 'Best model found has a score of {} with the parameters {}'.format(model_gs.best_score_, model_gs.best_params_)
+    	print '------- Fitting SVM GridSearchCV -------'
+    	model_gs.fit(self.X_train, y_train)
+    	print 'Best model found has a score of {} with the parameters {}'.format(model_gs.best_score_, model_gs.best_params_)
 
     def _score(self, y_true, y_pred):
-	'''
-	INPUT: true and predicted values
-	OUTPUT: ROC area under the curve (returns None in case of ValueError)
-	'''
+    	'''
+    	INPUT: true and predicted values
+    	OUTPUT: ROC area under the curve (returns None in case of ValueError)
+    	'''
         try:
-		return roc_auc_score(y_true, y_pred)
-	except ValueError:
-		print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
+		    return roc_auc_score(y_true, y_pred)
+	    except ValueError:
+		    print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
 
     # def plot_ROC(self, models):
     #     plt.figure()
@@ -300,48 +321,16 @@ class Models(object):
                 'subsample':.9,
                 'booster': 'gbtree',
                 'eval_metric': 'auc'}
-            num_round = 750
-            bst = xgb.train(param, dtrain, num_round)
+        num_round = 750
+        bst = xgb.train(param, dtrain, num_round)
 
-            return bst.predict(dtest)
+        return bst.predict(dtest)
 
 
-
-def combine_predictions_by_patient(predict_a, predict_b, predict_c, file_name):
+def create_submission(predict_a, file_name):
     '''
-    INPUT: predictions from three patients
-    OUTPUT: None, saves to csv
-    '''
-    prediction = np.concatenate([predict_a, predict_b, predict_c])
-    files = []
-    for directory in ['test_1_new', 'test_2_new', 'test_3_new']:
-        file_list = listdir('/data/'+directory)
-        file_list = sorted(file_list, key=lambda num: int(num.replace('.',
-            '_').split('_')[2]))
-        [files.append(file) for file in file_list]
-    prediction_df = pd.DataFrame({'File': files, 'Class': prediction}, columns = ['File', 'Class'])
-    prediction_df.to_csv(file_name, index=False)
-    print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
-
-def combine_predictions_with_combined_patients(predict_a, file_name):
-    '''
-    INPUT: predictions from combined patients
-    OUTPUT: None, saves to csv
-    '''
-    prediction = predict_a
-    files = []
-    for directory in ['test_1_new', 'test_2_new', 'test_3_new']:
-        file_list = listdir('/data/'+directory)
-        file_list = sorted(file_list, key=lambda num: int(num.replace('.',
-            '_').split('_')[2]))
-        [files.append(file) for file in file_list]
-    prediction_df = pd.DataFrame({'File': files, 'Class': prediction}, columns = ['File', 'Class'])
-    prediction_df.to_csv(file_name, index=False)
-    print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
-
-def combine_predictions_ensemble(predict_a, file_name):
-    '''
-    INPUT: an ensemble method for predictions from combined patients
+    INPUT: predictions(s) and destination file name.  Can take a matrix of
+        predictions (for an ensemble) and will return the average
     OUTPUT: None, saves to csv
     '''
     prediction = np.array(predict_a).mean(axis=0)
@@ -354,6 +343,7 @@ def combine_predictions_ensemble(predict_a, file_name):
     prediction_df = pd.DataFrame({'File': files, 'Class': prediction}, columns = ['File', 'Class'])
     prediction_df.to_csv(file_name, index=False)
     print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
+
 
 def import_data():
     '''
@@ -379,35 +369,12 @@ def import_data():
 
     return df_concat, test_concat
 
-if __name__ == '__main__':
-    # a_df = pd.read_csv('data/a_reduced15.csv')
-    # b_df = pd.read_csv('data/b_reduced15.csv')
-    # c_df = pd.read_csv('data/c_reduced15.csv')
-    # df_concat = pd.concat([\
-	# 	a_df[a_df['740'] == False].drop(['738', '739', '740'], axis=1),
-	# 	b_df[b_df['740'] == False].drop(['738', '739', '740'], axis=1),
-	# 	c_df[c_df['740'] == False].drop(['738', '739', '740'], axis=1)])\
-	# 		.reset_index(drop=True)
-    #
-    # a_test = pd.read_csv('data/a_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
-    # b_test = pd.read_csv('data/b_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
-    # c_test = pd.read_csv('data/c_test_reduced15.csv').sort_values(by='738').drop('738', axis=1)
-    # test_concat = np.concatenate([a_test, b_test, c_test])
 
+if __name__ == '__main__':
     df_concat, test_concat = import_data()
 
-    # cm = Models('combined', df_concat, test_concat)
-    # cm.fit()
-    # combine_predictions_ensemble(cm.predictions_test_set[0], 'data/prediction20.csv')
-
-
-    #combined_combine_predictions(combined_model.create_final_prediction(combined_model.models[0]), 'data/prediction16.csv')
-
-    #combine_predictions(model_a.create_final_prediction(model_a.models[0], a_test),
-    #                    model_b.create_final_prediction(model_b.models[0], b_test),
-   #                    model_c.create_final_prediction(model_c.models[0], c_test),
-    #                    'data/prediction11.csv')
-    #pred = pd.read_csv('data/prediction11.csv')
+    cm = Models('combined', df_concat, test_concat)
+    cm.fit()
+    # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
 
     # b.plot_ROC(b.models)
-##
