@@ -115,26 +115,26 @@ class Models(object):
             Normalizes both training and test data by subtracting the mean and
                 dividing by the std. Also adds dummies for patient number
     	'''
-    	X_patient = self.X[:,-1]
+    	# X_patient = self.X[:,-1]
+    	# test_set_patient = self.test_set[:,-1]
+        #
+    	# self.X = ((self.X - self.X.mean(axis=0)) / self.X.std(axis=0))[:,:-1]
+    	# self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
+        #
+    	# self.X = np.concatenate([self.X, pd.get_dummies(X_patient)], axis=1)
+    	# self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+
+    	X_train_patient = self.X_train[:,-1]
+    	X_test_patient = self.X_test[:,-1]
     	test_set_patient = self.test_set[:,-1]
 
-    	self.X = ((self.X - self.X.mean(axis=0)) / self.X.std(axis=0))[:,:-1]
+    	self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
+    	self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
     	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
 
-    	self.X = np.concatenate([self.X, pd.get_dummies(X_patient)], axis=1)
+    	self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
+    	self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
     	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
-
-    	#X_train_patient = self.X_train[:,-1]
-    	#X_test_patient = self.X_test[:,-1]
-    	#test_set_patient = self.test_set[:,-1]
-
-    	#self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
-    	#self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
-    	#self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
-
-    	#self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
-    	#self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
-    	#self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
         print '-------- Normalization and Dummy Adding Complete --------'
 
 
