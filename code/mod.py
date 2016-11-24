@@ -140,11 +140,10 @@ class Models(object):
 
     def fit(self):
     	self.logistic_regression()
-    	#self.logistic_regression()
-        #self.random_forest()
-        #self.xgb_static()
+        self.random_forest()
+        self.xgb_static()
         #self.xgb_grid_search()
-    	#self.svm_static()
+    	self.svm_static()
     	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
 
 
