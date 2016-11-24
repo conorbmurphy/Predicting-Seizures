@@ -396,12 +396,12 @@ def reduce_parallel2():
     '''
     to run on aws, change pool and paths
     '''
-    params = [('1', '/data/train_1', 'train', 'data/a_reduced15.csv'),
-            ('2', '/data/train_2', 'train', 'data/b_reduced15.csv'),
-            ('3', '/data/train_3', 'train', 'data/c_reduced15.csv'),
-            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced15.csv'),
-            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced15.csv'),
-            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced15.csv')]
+    params = [('1', '/data/train_1', 'train', 'data/a_reduced16.csv'),
+            ('2', '/data/train_2', 'train', 'data/b_reduced16.csv'),
+            ('3', '/data/train_3', 'train', 'data/c_reduced16.csv'),
+            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced16.csv'),
+            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced16.csv'),
+            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced16.csv')]
     files = [listdir(param[1]) for param in params]
     files[0].remove('1_45_1.mat') # removes corrupt file
     paths = [param[1] for param in params]
