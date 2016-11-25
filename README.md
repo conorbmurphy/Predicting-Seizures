@@ -1,4 +1,4 @@
-# Forecasting Seizures using Long-Term Brain Activity Recordings
+# Forecasting Seizures with Long-Term Brain Activity Recordings
 ### By Conor B. Murphy
 
 ## Summary
@@ -11,7 +11,7 @@ The data was provided by a [Kaggle competition](https://www.kaggle.com/c/melbour
 
 The training set is labeled with a 0 for interictal and 1 for preictal, or having a seizure in the next five minutes.  The training set also includes where it falls in a one-hour segment, information that is not available in the test set.
 
-![Image of an Interictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
+![Image of an Interictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/interictal.png)
 
 ![Image o of an Preictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
 

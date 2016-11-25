@@ -47,7 +47,7 @@ def plot_segments(segment, title, color, name):
         ax.plot(flips, c=color)
         ax.set_yticks([])
         ax.set_xticks([])
-    plt.title(title)
+    plt.suptitle(title)
     plt.savefig(name)
 
 if __name__ == '__main__':
