@@ -1,14 +1,38 @@
-# Predicting Seizures using Long-Term iEEG Recordings
+# Forecasting Seizures using Long-Term Brain Activity Recordings
 ### By Conor B. Murphy
 
 ## Summary
 
+While it has long been known that the brain changes state before the onset of a seizure, no reliable clinical application has been developed to forecast seizures until recently.  The world's first clinical trial of this technology is the implantable NeuroVista Seizure Advisory System that employs long-term intracranial electroencephalography (iEEG) to record brain activity linked to drug-resistant, persistent epilepsy.  This project addresses the most difficult aspect of seizure forecasting by classifying 10-minute recordings as either interictal (baseline) or preictal (prior to seizure) events.  I found that an ensemble method using logistic regression, gradient boosting, random forest and support vector machines gave me the best results of a .82 area under the ROC curve.
+
 ## Data
+
+The data was provided by a [Kaggle competition](https://www.kaggle.com/c/melbourne-university-seizure-prediction) in collaboration with The University of Melbourne and other sponsors.  The data set consists of 7950 recordings from three patients totaling 40 gb of data.  Each recording is 240k observations of 16 variables, or a 10-minute recording at 400 hz of 16 channels of electrophysiological monitoring.
+
+The training set is labeled with a 0 for interictal and 1 for preictal, or having a seizure in the next five minutes.  The training set also includes where it falls in a one-hour segment, information that is not available in the test set.
+
+![Image of an Interictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
+
+![Image o of an Preictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
 
 ## Feature Building
 
+List of features
+Why
+What worked, what didn't
+Development environment
+
 ## Modeling
+
+Modeling on just the last segment-how did that work?
+Techniques tried - RF, SVM, LR, XGB
+Dimensionality reduction
+Imbalanced classes
 
 ## Key Findings
 
 ## Next steps
+
+## Acknowledgements
+
+## References
