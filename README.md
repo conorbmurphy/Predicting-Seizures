@@ -11,9 +11,21 @@ The data was provided by a [Kaggle competition](https://www.kaggle.com/c/melbour
 
 The training set is labeled with a 0 for interictal and 1 for preictal, or having a seizure in the next five minutes.  The training set also includes where it falls in a one-hour segment, information that is not available in the test set.
 
+## Exploratory Analysis
+
 ![Image of an Interictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/interictal.png)
 
-![Image o of an Preictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
+  *Figure 1:* This plot shows an hour of 16 channels of iEEG data for a period of time not followed by a seizure
+
+![Image of a Preictal Recording](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/preictal.png)
+
+  *Figure 2:* This plot shows an hour leading up to a seizure, the seizure itself taking place five minutes after the end of the recording
+
+In the above plots, we can draw attention to some of the general features I focus on in my model.  In recordings not followed by a seizure, we see higher frequency brain activity.  By contrast, the preictal recording shows lower frequency activity.
+
+If we plot kernel denisity estimators
+
+![KDE Plot](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/kde.png)
 
 ## Feature Building
 
