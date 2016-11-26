@@ -143,7 +143,8 @@ class Models(object):
         self.random_forest()
         self.xgb_static()
         #self.xgb_grid_search()
-    	self.svm_static()
+    	self.svm_rbf()
+        self.svm_linear()
     	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
         print '-------- Fit for Patient {} Complete --------'.format(self.patient)
 
@@ -169,8 +170,11 @@ class Models(object):
 
     def random_forest(self):
         model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
-        model.fit(self.X_train, self.y_train)
+        scores = cross_val_score(model, self.X_train, self.y_train, cv=5,
+            scoring='roc_auc', n_jobs=-1)
+        print 'Cross-validated Random Forest train score for patient %s: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2)
 
+        model.fit(self.X_train, self.y_train)
     	prediction = model.predict_proba(self.X_test)[:,1]
     	score = self._score(self.y_test, prediction)
         print 'Score for Random Forest for patient {}: {}'.format(self.patient, score)
@@ -231,12 +235,35 @@ class Models(object):
         self.models.append(optimized_GBM.best_estimator_)
         print 'Completed xgb_grid_search'
 
-    def svm_static(self):
+    def svm_rbf(self):
         y_train = (self.y_train * 2) - 1
     	y_test = (self.y_test * 2) - 1
     	model = svm.SVC(kernel='rbf', C=1, gamma=.01, probability=True, class_weight='balanced')
+        scores = cross_val_score(model, self.X_train, self.y_train, cv=5,
+            scoring='roc_auc', n_jobs=-1)
+        print 'Cross-validated SVM-RBF train score for patient %s: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2)
+
     	model.fit(self.X_train, y_train)
 
+    	prediction = model.predict_proba(self.X_test)[:,1]
+    	score = self._score(y_test, prediction)
+    	print "Score for SVM for patient {}: {}".format(self.patient, score)
+
+    	self.models.append(model)
+    	self.model_scores.append(score)
+    	self.predictions.append(prediction)
+
+    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+
+    def svm_linear(self):
+        y_train = (self.y_train * 2) - 1
+    	y_test = (self.y_test * 2) - 1
+    	model = svm.SVC(kernel='linear', C=1, gamma=.01, probability=True, class_weight='balanced')
+        scores = cross_val_score(model, self.X_train, self.y_train, cv=5,
+            scoring='roc_auc', n_jobs=-1)
+        print 'Cross-validated SVM-Linear train score for patient %s: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2)
+
+    	model.fit(self.X_train, y_train)
     	prediction = model.predict_proba(self.X_test)[:,1]
     	score = self._score(y_test, prediction)
     	print "Score for SVM for patient {}: {}".format(self.patient, score)
