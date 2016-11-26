@@ -145,6 +145,7 @@ class Models(object):
         #self.xgb_grid_search()
     	self.svm_static()
     	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
+	print '-------- Fit for Patient {} Complete --------'.format(self.patient)
 
 
     def logistic_regression(self):
@@ -364,23 +365,26 @@ def import_data(separate=False):
         .drop('818', axis=1)
 
     if separate:
+	return a_df, b_df, c_df, np.array(a_test), np.array(b_test), np.array(c_test)
+    else:
         df_concat = pd.concat([a_df, b_df, c_df]).reset_index(drop=True)
         test_concat = np.concatenate([a_test, b_test, c_test])
         return df_concat, test_concat
-    else:
-        return a_df, b_df, c_df, a_test, b_test,_ c_test
 
 
 if __name__ == '__main__':
     df_concat, test_concat = import_data()
-    a_df, b_df, c_df, a_test, b_test,_ c_test = import_data(separate=True)
+    a_df, b_df, c_df, a_test, b_test, c_test = import_data(separate=True)
 
-    cm = Models('combined', df_concat, test_concat)
-    cm.fit()
-
+    com = Models('combined', df_concat, test_concat)
     am = Models('A', a_df, a_test)
     bm = Models('B', b_df, b_test)
     cm = Models('C', c_df, c_test)
+
+    com.fit()
+    am.fit()
+    bm.fit()
+    cm.fit()
 
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
