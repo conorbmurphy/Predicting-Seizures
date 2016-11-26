@@ -343,19 +343,18 @@ def create_submission(predict_a, file_name):
     print 'Saved file {} with shape {}'.format(file_name, prediction_df.shape)
 
 
-def import_data():
+def import_data(separate=False):
     '''
-    INPUT: None
+    INPUT: separate - Boolean, whether to return concatenated or separate data frames
     OUTPUT: combined training and test sets
     '''
     a_df = pd.read_csv('data/a_reduced16.csv')
     b_df = pd.read_csv('data/b_reduced16.csv')
     c_df = pd.read_csv('data/c_reduced16.csv')
-    df_concat = pd.concat([\
-		a_df[a_df['820'] == False].drop(['818', '819', '820'], axis=1),
-		b_df[b_df['820'] == False].drop(['818', '819', '820'], axis=1),
-		c_df[c_df['820'] == False].drop(['818', '819', '820'], axis=1)])\
-			.reset_index(drop=True)
+
+    a_df = a_df[a_df['820'] == False].drop(['818', '819', '820'], axis=1)
+    b_df = b_df[b_df['820'] == False].drop(['818', '819', '820'], axis=1)
+    c_df = c_df[c_df['820'] == False].drop(['818', '819', '820'], axis=1)
 
     a_test = pd.read_csv('data/a_test_reduced16.csv').sort_values(by='818')\
         .drop('818', axis=1)
@@ -363,16 +362,27 @@ def import_data():
         .drop('818', axis=1)
     c_test = pd.read_csv('data/c_test_reduced16.csv').sort_values(by='818')\
         .drop('818', axis=1)
-    test_concat = np.concatenate([a_test, b_test, c_test])
 
-    return df_concat, test_concat
+    if separate:
+        df_concat = pd.concat([a_df, b_df, c_df]).reset_index(drop=True)
+        test_concat = np.concatenate([a_test, b_test, c_test])
+        return df_concat, test_concat
+    else:
+        return a_df, b_df, c_df, a_test, b_test,_ c_test
 
 
 if __name__ == '__main__':
     df_concat, test_concat = import_data()
+    a_df, b_df, c_df, a_test, b_test,_ c_test = import_data(separate=True)
 
     cm = Models('combined', df_concat, test_concat)
     cm.fit()
+
+    am = Models('A', a_df, a_test)
+    bm = Models('B', b_df, b_test)
+    cm = Models('C', c_df, c_test)
+
+
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
 
     # b.plot_ROC(b.models)

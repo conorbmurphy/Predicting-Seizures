@@ -33,7 +33,6 @@ In the above plots, we can draw attention to some of the general features I focu
 
 
 
-
 ### Channel Correlation
 
 Make heatmap of correlations
