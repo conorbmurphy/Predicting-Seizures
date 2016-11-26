@@ -153,7 +153,7 @@ class Models(object):
             n_jobs=-1)
         scores = cross_val_score(model, self.X_train, self.y_train, cv=5,
             scoring='roc_auc', n_jobs=-1)
-        print 'Cross-validated Logistic Regression train score for patient %f: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2))
+        print 'Cross-validated Logistic Regression train score for patient %s: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2)
 
         model.fit(self.X_train, self.y_train)
     	prediction = model.predict_proba(self.X_test)[:,1]
@@ -329,7 +329,7 @@ def import_data(separate=False):
         .drop('818', axis=1)
 
     if separate:
-        return a_df, b_df, c_df, np.array(a_test), np.array(b_test),
+        return a_df, b_df, c_df, np.array(a_test), np.array(b_test),\
             np.array(c_test)
     else:
         df_concat = pd.concat([a_df, b_df, c_df]).reset_index(drop=True)
