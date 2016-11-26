@@ -61,8 +61,6 @@ def plot_kde(interictal_sample, preictal_sample, title, name):
     kde = sns.kdeplot(preictal_sample, shade=True, color="r")
     kde.set(xlim=(-65,65))
     kde.set_title(title)
-    # sns.plt.xlim(-65,65)
-    # sns.plt.title(title)
     plt.savefig(name)
 
 def plot_channel_kde(interictal_sample, preictal_sample, title, name):
@@ -72,8 +70,12 @@ def plot_channel_kde(interictal_sample, preictal_sample, title, name):
     '''
     fig, ax_list = plt.subplots(4, 4, figsize=(10, 10))
     for ax, flips in zip(ax_list.flatten(), range(16)):
-        ax.sns.kdeplot(interictal_sample[:,flips], shade=True, color="b")
-        ax.sns.kdeplot(preictal_sample[:,flips], shade=True, color="r")
+        kde = sns.kdeplot(interictal_sample[:,flips], shade=True, color="b",
+            ax=ax)
+        kde = sns.kdeplot(preictal_sample[:,flips], shade=True, color="r",
+            ax=ax)
+        kde.set(xlim=(-100, 100), ylim=(0, .06))
+        kde.set_title('Channel {}'.format(flips+1))
     plt.suptitle(title)
     plt.savefig(name)
 
@@ -95,7 +97,7 @@ if __name__ == '__main__':
         'Kernel Density Plot of One Hour Recording Pre- and Interictal',
         'figures/kde.png')
 
-    plot_kde(i_compiled,
+    plot_channel_kde(i_compiled,
         p_compiled,
         'Kernel Density Plots by Channel Pre- and Interictal',
         'figures/kde2.png')

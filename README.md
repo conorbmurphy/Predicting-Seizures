@@ -27,6 +27,8 @@ If we plot kernel denisity estimators
 
 ![KDE Plot](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/kde.png)
 
+![KDE Plot](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/kde2.png)
+
 ## Feature Building
 
 List of features
