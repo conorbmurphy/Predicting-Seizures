@@ -1,5 +1,5 @@
 
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -145,29 +145,20 @@ class Models(object):
         #self.xgb_grid_search()
     	self.svm_static()
     	# self.svm_grid_search() # Found C:1 and gamma:.01 as best choices at .77 score
-	print '-------- Fit for Patient {} Complete --------'.format(self.patient)
+        print '-------- Fit for Patient {} Complete --------'.format(self.patient)
 
 
     def logistic_regression(self):
-    	# for train_index, test_index in zip(self.train_indexes, self.test_indexes):
-        #     	model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
-        #     	model.fit(self.X[train_index], self.y[train_index])
-        #
-    	# 	          prediction = model.predict_proba(self.X[test_index])[:,1]
-    	#         score = self._score(self.y[test_index], prediction)
-        #     	print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
-        #
-    	#         self.model_scores.append(score)
-        #     	self.models.append(model)
-    	# 	self.predictions.append(prediction)
-        #
-    	# 	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
-        model = LogisticRegression(penalty='l1', class_weight='balanced', n_jobs=-1)
-        model.fit(self.X_train, self.y_train)
+        model = LogisticRegression(penalty='l1', class_weight='balanced',
+            n_jobs=-1)
+        scores = cross_val_score(model, self.X_train, self.y_train, cv=5,
+            scoring='roc_auc', n_jobs=-1)
+        print 'Cross-validated Logistic Regression train score for patient %f: %0.2f (+/- %0.2f)'%(self.patient, scores.mean(), scores.std() * 2))
 
+        model.fit(self.X_train, self.y_train)
     	prediction = model.predict_proba(self.X_test)[:,1]
     	score = self._score(self.y_test, prediction)
-        print 'Score for Logistic Regression for patient {}: {}'.format(self.patient, score)
+        print 'Logistic Regression test score for patient {}: {}'.format(self.patient, score)
 
     	self.model_scores.append(score)
         self.models.append(model)
@@ -279,51 +270,24 @@ class Models(object):
         except ValueError:
             print 'ValueError: Returning None. Check to see that y_true is the first argument passed to _score'
 
-    # def plot_ROC(self, models):
-    #     plt.figure()
-    #     lw = 2
-    #     for model in models:
-    #         y_score = model.decision_function(self.X_test)
-    #         fpr, tpr, roc_auc = dict(), dict(), dict()
-    #         fpr, tpr, _ = roc_curve(self.y_test, y_score)
-    #         roc_auc = auc(fpr, tpr)
-    #         plt.plot(fpr, tpr, color='darkorange', lw=lw, label=model.solver)
-    #     plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    #     plt.xlim([0.0, 1.0])
-    #     plt.ylim([0.0, 1.05])
-    #     plt.xlabel('False Positive Rate')
-    #     plt.ylabel('True Positive Rate')
-    #     plt.title('Receiver operating characteristic for patient {}'.format(self.patient))
-    #     plt.legend(loc="lower right")
-    #     plt.show()
+    def plot_ROC(self, models):
+        plt.figure()
+        lw = 2
+        for model in models:
+            y_score = model.decision_function(self.X_test)
+            fpr, tpr, roc_auc = dict(), dict(), dict()
+            fpr, tpr, _ = roc_curve(self.y_test, y_score)
+            roc_auc = auc(fpr, tpr)
+            plt.plot(fpr, tpr, color='darkorange', lw=lw, label=model.solver)
+        plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver operating characteristic for patient {}'.format(self.patient))
+        plt.legend(loc="lower right")
+        plt.show()
 
-    def create_final_prediction(self, model):
-        '''
-        INPUT: model to predict on and test set.  This will refit the model on
-            the entire training set before predicting
-        OUTPUT: predicted model
-        '''
-        x = np.concatenate([self.X_train, self.X_test])
-        y = np.concatenate([self.y_train, self.y_test])
-        try:
-            model.fit(x, y)
-            print 'Used fit method to create model'
-            return model.predict(test_set)
-        except AttributeError:
-            print 'fitting xgboost'
-            dtrain = xgb.DMatrix(x, y)
-            dtest = xgb.DMatrix(self.test_set)
-	    param = {'max_depth':5,
-                'eta':.2, # step shrink size
-                'silent':1,
-                'objective':'binary:logistic',
-                'subsample':.9,
-                'booster': 'gbtree',
-                'eval_metric': 'auc'}
-        num_round = 750
-        bst = xgb.train(param, dtrain, num_round)
-
-        return bst.predict(dtest)
 
 
 def create_submission(predict_a, file_name):
@@ -365,7 +329,8 @@ def import_data(separate=False):
         .drop('818', axis=1)
 
     if separate:
-	return a_df, b_df, c_df, np.array(a_test), np.array(b_test), np.array(c_test)
+        return a_df, b_df, c_df, np.array(a_test), np.array(b_test),
+            np.array(c_test)
     else:
         df_concat = pd.concat([a_df, b_df, c_df]).reset_index(drop=True)
         test_concat = np.concatenate([a_test, b_test, c_test])
