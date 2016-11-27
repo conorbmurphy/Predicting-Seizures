@@ -301,7 +301,7 @@ def reduce_parallel():
         ifile = [paths[i]+'/'+file for file in files[i]]
         print 'Launching pool to construct {}'.format(dfile)
         pool = multiprocessing.Pool(40)
-        output = pool.map(Features, ifile)
+        output = pool.map(Feature_wrapper, ifile)
         pd.DataFrame(np.concatenate(output)).to_csv(dfile, index=False)
         print 'Saved file {}'.format(dfile)
 
