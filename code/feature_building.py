@@ -33,12 +33,13 @@ class Features(object):
         print 'Fitting {}'.format(self.file_name)
         self.load_file()
 
-        self.metadata()
-        self.channel_means()
-        self.wavelet_transformation()
-        self.method_of_moments()
-        self.entropize()
-        self.correlate()
+	if self.temp_mat[0].sum() != 0:
+	        self.metadata()
+        	self.channel_means()
+        	self.wavelet_transformation()
+        	self.method_of_moments()
+        	self.entropize()
+        	self.correlate()
 
 
     def load_file(self):
@@ -198,8 +199,8 @@ class Features(object):
         '''
         correlations = []
         for c in combinations(range(16), 2):
-            correlations.append(pearsonr(self.temp_mat2[c[0]],\
-                self.temp_mat2[c[1]])[0])
+            correlations.append(pearsonr(self.temp_mat2[:,c[0]],\
+                self.temp_mat2[:,c[1]])[0])
         corr_mean = np.mean(correlations)
         corr_var = np.var(correlations)
         self.correlations = np.hstack([np.array(correlations), corr_mean, corr_var]).reshape(1,-1)
@@ -235,10 +236,10 @@ class Features(object):
                         self.patient,
                         self.id]).reshape(1,-1)], axis=1)
         	return result.flatten().reshape(1,-1)
-        except ValueError:
-        	print 'Unable to process {} due to ValueError, returning negative ones'\
+        except (ValueError, TypeError):
+        	print 'Unable to process {} due to ValueError or TypeError, returning negative ones'\
                 .format(self.file_name)
-        	return np.ones(742)*-1
+        	return np.ones(821)*-1
 
 
     def _return_frequencies(self):
