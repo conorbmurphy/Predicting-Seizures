@@ -288,7 +288,7 @@ class Features(object):
         freq = self.return_frequencies()
         result = np.array([])
         for i in range(16):
-            cwtavg = signal.cwt(self.temp_mat2[:,i], signal.ricker, freq)
+            cwtavg = signal.cwt(self.temp_mat[0][:,i], signal.ricker, freq) # throws error w/ temp_mat2
             result = np.concatenate([result, (cwtavg**2).mean(axis=1)])
         self.wavelets = result.reshape(1,-1)
 
@@ -353,15 +353,19 @@ class Features(object):
         '''
        INPUT: None
         OUTPUT: None
-            Saves 16 channel entropies to self.entropies
+            Saves 16 channel entropies to self.entropies, zeros if empty dataset
         '''
         entropies = []
-        for col in range(16):
-            kde = gaussian_kde(self.temp_mat2[:,col])
-            r = np.linspace(min(self.temp_mat2[:,col]),\
-                max(self.temp_mat2[:,col]), len(self.temp_mat2[:,col])/1E3)
-            entropies.append(entropy(kde.evaluate(r)))
-        self.entropies = np.array(entropies).reshape(1,-1)
+	length = self.temp_mat2.shape[0]/1E3
+	try:
+	        for col in range(16):
+	            kde = gaussian_kde(self.temp_mat2[:,col])
+	            r = np.linspace(min(self.temp_mat2[:,col]),\
+	                max(self.temp_mat2[:,col]), length)
+	            entropies.append(entropy(kde.evaluate(r)))
+	        self.entropies = np.array(entropies).reshape(1,-1)
+	except ValueError:
+		self.entropies = np.zeros(16).reshape(1, -1)
 
     def correlate(self):
         '''
@@ -579,4 +583,4 @@ def reduce_parallel():
 
 if __name__ == '__main__':
     label = return_labels()
-    reduce_parallel()
+    #reduce_parallel()
