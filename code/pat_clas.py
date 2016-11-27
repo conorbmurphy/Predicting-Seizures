@@ -346,7 +346,13 @@ def reduce_one_file(file_name):
         min_total = temp_mat2.min()
         median_channel = np.median(temp_mat2, axis=0)
         median_total = np.median(temp_mat2)
-	#ent = entropy(np.abs(temp_mat2))
+
+        entropies = []
+        for col in range(16):
+            kde = gaussian_kde(tem_mat2[:,col])
+            r = np.linspace(min(tem_mat2[:,col]), max(tem_mat2[:,col]),\
+                len(mat[:,col])/1E3)
+            entropies.append(entropy(kde.evaluate(r)))
 
         correlations = []
         for c in combinations(range(16), 2):
@@ -367,8 +373,8 @@ def reduce_one_file(file_name):
                         min_total,
                         median_channel,
                         median_total,
-			#ent,
-			np.array(correlations),
+			            np.array(entropies),
+			            np.array(correlations),
                         corr_mean,
                         corr_var]).flat).reshape(1,-1)
     else:
@@ -396,12 +402,12 @@ def reduce_parallel2():
     '''
     to run on aws, change pool and paths
     '''
-    params = [('1', '/data/train_1', 'train', 'data/a_reduced16.csv'),
-            ('2', '/data/train_2', 'train', 'data/b_reduced16.csv'),
-            ('3', '/data/train_3', 'train', 'data/c_reduced16.csv'),
-            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced16.csv'),
-            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced16.csv'),
-            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced16.csv')]
+    params = [('1', '/data/train_1', 'train', 'data/a_reduced17.csv'),
+            ('2', '/data/train_2', 'train', 'data/b_reduced17.csv'),
+            ('3', '/data/train_3', 'train', 'data/c_reduced17.csv'),
+            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced17.csv'),
+            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced17.csv'),
+            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced17.csv')]
     files = [listdir(param[1]) for param in params]
     files[0].remove('1_45_1.mat') # removes corrupt file
     paths = [param[1] for param in params]
