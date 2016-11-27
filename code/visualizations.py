@@ -43,9 +43,9 @@ def plot_segments(segment, title, color, name):
         str - destination file
     OUTPUT: saves figure as name
     '''
-    fig, ax_list = plt.subplots(16,1, figsize=(20, 10))
+    fig, ax_list = plt.subplots(16,1, figsize=(10, 5))
     for ax, flips in zip(ax_list.flatten(), segment.transpose()):
-        ax.plot(flips, c=color)
+        ax.plot(flips, c=color, linewidth=.5)
         ax.set_yticks([])
         ax.set_xticks([])
     plt.suptitle(title)
@@ -56,7 +56,7 @@ def plot_kde(interictal_sample, preictal_sample, title, name):
     INPUT: 1D numpy arrays of interictal and preictal samples
     OUTPUT: saves figure as name
     '''
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(10, 5))
     kde = sns.kdeplot(interictal_sample, shade=True, color="b")
     kde = sns.kdeplot(preictal_sample, shade=True, color="r")
     kde.set(xlim=(-65,65))

@@ -35,11 +35,6 @@ class Features(object):
 
 	if self.temp_mat[0].sum() != 0:
 	        self.metadata()
-        	self.channel_means()
-        	self.wavelet_transformation()
-        	self.method_of_moments()
-        	self.entropize()
-        	self.correlate()
 
 
     def load_file(self):
@@ -94,7 +89,7 @@ class Features(object):
             else:
                 result = np.append(result, np.zeros(16))
             start = segment+1
-        self.means = result.reshape(1,-1)
+        return result.reshape(1,-1)
 
 
     def wavelet_transformation(self):
@@ -110,7 +105,7 @@ class Features(object):
         for i in range(16):
             cwtavg = signal.cwt(self.temp_mat[0][:,i], signal.ricker, freq) # throws error w/ temp_mat2
             result = np.concatenate([result, (cwtavg**2).mean(axis=1)])
-        self.wavelets = result.reshape(1,-1)
+        return result.reshape(1,-1)
 
 
     def method_of_moments(self):
@@ -152,7 +147,7 @@ class Features(object):
             median_channel = np.median(self.temp_mat2, axis=0)
             median_total = np.median(self.temp_mat2)
 
-            self.mom = np.hstack(np.array([\
+            return np.hstack(np.array([\
                             arith_mean_channel,
                             arith_mean_total,
                             variance_channel,
@@ -168,7 +163,7 @@ class Features(object):
                             median_total]).flat).reshape(1,-1)
 
         else:
-            self.mom = np.zeros(118).reshape(1, -1) # BE CAREFUL WITH THIS
+            return np.zeros(118).reshape(1, -1) # BE CAREFUL WITH THIS
 
 
     def entropize(self):
@@ -185,9 +180,9 @@ class Features(object):
 	            r = np.linspace(min(self.temp_mat2[:,col]),\
 	                max(self.temp_mat2[:,col]), length)
 	            entropies.append(entropy(kde.evaluate(r)))
-	        self.entropies = np.array(entropies).reshape(1,-1)
+	        return np.array(entropies).reshape(1,-1)
 	except ValueError:
-		self.entropies = np.zeros(16).reshape(1, -1)
+		return np.zeros(16).reshape(1, -1)
 
 
     def correlate(self):
@@ -203,7 +198,7 @@ class Features(object):
                 self.temp_mat2[:,c[1]])[0])
         corr_mean = np.mean(correlations)
         corr_var = np.var(correlations)
-        self.correlations = np.hstack([np.array(correlations), corr_mean, corr_var]).reshape(1,-1)
+        return np.hstack([np.array(correlations), corr_mean, corr_var]).reshape(1,-1)
 
 
     def return_results(self):
@@ -214,11 +209,11 @@ class Features(object):
         try:
         	if self.clas:
         		result = np.concatenate([\
-                    self.means,
-                    self.wavelets,
-                    self.mom,
-                    self.entropies,
-                    self.correlations,
+                    self.channel_means(),
+                    self.wavelet_transformation(),
+                    self.method_of_moments(),
+                    self.entropize(),
+                    self.correlate(),
                     np.array([\
                         self.patient,
                         self.id,
@@ -226,12 +221,12 @@ class Features(object):
                         self.contaminated,
                         self.clas]).reshape(1,-1)], axis=1)
         	else:
-                    result = np.concatenate([\
-                    self.means,
-                    self.wavelets,
-                    self.mom,
-                    self.entropies,
-                    self.correlations,
+        		  result = np.concatenate([\
+                    self.channel_means(),
+                    self.wavelet_transformation(),
+                    self.method_of_moments(),
+                    self.entropize(),
+                    self.correlate(),
                     np.array([\
                         self.patient,
                         self.id]).reshape(1,-1)], axis=1)
@@ -314,7 +309,7 @@ def reduce_parallel():
 if __name__ == '__main__':
     errors = []
     label = return_labels()
-    
+
     reduce_parallel()
 
     print 'Errors in fitting {} files'.format(len(errors))
