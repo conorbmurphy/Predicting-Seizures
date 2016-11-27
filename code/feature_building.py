@@ -192,7 +192,7 @@ class Patient(object):
 
 
 class Features(object):
-    __init__(file_name):
+    def __init__(self, file_name):
         self.file_name = file_name
 
         self.temp_mat = None # Full recording
@@ -213,17 +213,17 @@ class Features(object):
         self.fit()
 
     def fit(self):
-        print 'Fitting {}'.format(file_name)
+        print 'Fitting {}'.format(self.file_name)
         self.load_file()
 
         self.metadata()
         self.channel_means()
         self.wavelet_transformation()
         self.method_of_moments()
-        self.entropies()
-        self.correlations()
+        self.entropize()
+        self.correlate()
 
-        self.return_results()
+        #self.return_results()
 
     def load_file(self):
         '''
@@ -232,7 +232,7 @@ class Features(object):
             Loads file and saves to self.temp_mat
             Saves all non-zero values to self.temp_mat2
         '''
-        self.temp_mat = loadmat(file_name)['dataStruct'][0][0]
+        self.temp_mat = loadmat(self.file_name)['dataStruct'][0][0]
         self.temp_mat2 = self.temp_mat[0][np.all(self.temp_mat[0], axis=1)]
 
     def metadata(self):
@@ -288,7 +288,7 @@ class Features(object):
         freq = self.return_frequencies()
         result = np.array([])
         for i in range(16):
-            cwtavg = signal.cwt(self.temp_mat2[0][:,i], signal.ricker, freq)
+            cwtavg = signal.cwt(self.temp_mat2[:,i], signal.ricker, freq)
             result = np.concatenate([result, (cwtavg**2).mean(axis=1)])
         self.wavelets = result.reshape(1,-1)
 
@@ -320,9 +320,8 @@ class Features(object):
             variance_total = self.temp_mat2.var(ddof=1)
             variance_of_variances = variance_channel.var(ddof=1) # this is very high
 
-            kurtosis_channel = kurtosis(self.temp_mat2[0]).reshape(1,-1)
-            skew_channel = skew(self.temp_mat2[0]).reshape(1,-1)
-
+            kurtosis_channel = kurtosis(self.temp_mat2)
+            skew_channel = skew(self.temp_mat2)
 
             max_channel = self.temp_mat2.max(axis=0)
             max_total = self.temp_mat2.max()
@@ -350,21 +349,21 @@ class Features(object):
         else:
             self.mom = np.zeros(118).reshape(1, -1) # BE CAREFUL WITH THIS
 
-    def entropies(self):
+    def entropize(self):
         '''
-        INPUT: None
+       INPUT: None
         OUTPUT: None
             Saves 16 channel entropies to self.entropies
         '''
         entropies = []
         for col in range(16):
-            kde = gaussian_kde(self.self.temp_mat2[:,col])
+            kde = gaussian_kde(self.temp_mat2[:,col])
             r = np.linspace(min(self.temp_mat2[:,col]),\
                 max(self.temp_mat2[:,col]), len(self.temp_mat2[:,col])/1E3)
             entropies.append(entropy(kde.evaluate(r)))
-        self.entropies = np.array(entropies)
+        self.entropies = np.array(entropies).reshape(1,-1)
 
-    def correlations(self):
+    def correlate(self):
         '''
         INPUT: None
         OUTPUT: None
@@ -377,8 +376,7 @@ class Features(object):
                 self.temp_mat2[c[1]])[0])
         corr_mean = np.mean(correlations)
         corr_var = np.var(correlations)
-        self.correlations = np.concatenate([\
-            np.array(correlations).reshape(-1,1), corr_mean, corr_var], axis=1)
+        self.correlations = np.hstack([np.array(correlations), corr_mean, corr_var]).reshape(1,-1)
 
     def return_results(self):
         '''
@@ -400,7 +398,7 @@ class Features(object):
                         self.contaminated,
                         self.clas]).reshape(1,-1)], axis=1)
         	else:
-                result = np.concatenate([\
+                    result = np.concatenate([\
                     self.means,
                     self.wavelets,
                     self.mom,
@@ -546,6 +544,14 @@ def return_labels():
     return list(label[label['safe'] == 0]['image']) # list of contaminated files
 
 
+def Feature_wrapper(path):
+    ''' 
+    INPUT: file path 
+    OUTPUT: Features result
+    '''
+    a = Features(path)
+    return a.return_results()
+
 def reduce_parallel():
     '''
     to run on aws, change pool and paths
@@ -573,5 +579,4 @@ def reduce_parallel():
 
 if __name__ == '__main__':
     label = return_labels()
-    # frequencies = return_frequencies()
     reduce_parallel()
