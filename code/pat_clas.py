@@ -8,7 +8,7 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 import multiprocessing
 from scipy import signal
-from scipy.stats import kurtosis, skew, pearsonr, entropy
+from scipy.stats import kurtosis, skew, pearsonr, entropy, gaussian_kde
 from itertools import combinations
 
 # class Patient(object):
@@ -349,9 +349,9 @@ def reduce_one_file(file_name):
 
         entropies = []
         for col in range(16):
-            kde = gaussian_kde(tem_mat2[:,col])
-            r = np.linspace(min(tem_mat2[:,col]), max(tem_mat2[:,col]),\
-                len(mat[:,col])/1E3)
+            kde = gaussian_kde(temp_mat2[:,col])
+            r = np.linspace(min(temp_mat2[:,col]), max(temp_mat2[:,col]),\
+                len(temp_mat2[:,col])/1E3)
             entropies.append(entropy(kde.evaluate(r)))
 
         correlations = []
@@ -378,7 +378,7 @@ def reduce_one_file(file_name):
                         corr_mean,
                         corr_var]).flat).reshape(1,-1)
     else:
-        result_mom = np.zeros(225).reshape(1, -1) # BE CAREFUL WITH THIS
+        result_mom = np.zeros(241).reshape(1, -1) # BE CAREFUL WITH THIS
 
     #result = np.append(result, result_mom)
 
