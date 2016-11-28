@@ -117,12 +117,12 @@ def wavelet_spectrogram(mat, title, name):
     # pool = multiprocessing.Pool(40)
     # output = pool.map(continuous_wavelet_tranformation, mat.T)
     freq = return_frequencies()
-    result = np.array([])
-    for i in range(16):
-        if i == 0:
-            result = signal.cwt(mat[:,i], signal.ricker, freq)
-        else:
-            result += signal.cwt(mat[:,i], signal.ricker, freq)
+    result = signal.cwt(mat[:,15], signal.ricker, freq)
+    #for i in range(16):
+    #    if i == 0:
+    #        result = signal.cwt(mat[:,i], signal.ricker, freq)
+    #    else:
+    #        result += signal.cwt(mat[:,i], signal.ricker, freq)
     # result = output[0]
     # for i in result[1:]:
 	# result += i
@@ -159,9 +159,9 @@ if __name__ == '__main__':
     #     'figures/kde2.png')
 
     wavelet_spectrogram(i_compiled,
-        'Interictal Wavelet Spectrogram',
+        'Interictal Wavelet Spectrogram from Channel 16',
         'figures/spectrogram_i.png')
 
     wavelet_spectrogram(p_compiled,
-        'Preictal Wavelet Spectrogram',
+        'Preictal Wavelet Spectrogram from Channel 16',
         'figures/spectrogram_p.png')
