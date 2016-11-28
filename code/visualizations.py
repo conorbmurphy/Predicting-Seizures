@@ -109,7 +109,7 @@ def wavelet_spectrogram(mat, title, name):
     OUTPUT: None, saves imate
     '''
     plt.figure(figsize=(10, 5))
-        freq = return_frequencies()
+    freq = return_frequencies()
     result = signal.cwt(mat[:,15], signal.ricker, freq)
     plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
@@ -135,15 +135,15 @@ if __name__ == '__main__':
         'r',
         'figures/preictal.png')
 
-    plot_kde(i_compiled.flatten(),
-        p_compiled.flatten(),
-        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-        'figures/kde.png')
+    #plot_kde(i_compiled.flatten(),
+    #    p_compiled.flatten(),
+    #    'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+    #    'figures/kde.png')
 
-    plot_channel_kde(i_compiled,
-        p_compiled,
-        'Kernel Density Plots by Channel Pre- and Interictal',
-        'figures/kde2.png')
+    #plot_channel_kde(i_compiled,
+    #    p_compiled,
+    #    'Kernel Density Plots by Channel Pre- and Interictal',
+    #    'figures/kde2.png')
 
     wavelet_spectrogram(i_compiled,
         'Interictal Wavelet Spectrogram from Channel 16',
