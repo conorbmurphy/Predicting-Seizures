@@ -134,40 +134,40 @@ def wavelet_spectrogram(mat, title, name):
 
 
 if __name__ == '__main__':
-    # interictal, preictal = file_names(1)
-    # i_compiled, p_compiled = compile_files(interictal, preictal)
-    #
-    # df_concat, test_concat = import_data()
+    interictal, preictal = file_names(1)
+    i_compiled, p_compiled = compile_files(interictal, preictal)
+
+    df_concat, test_concat = import_data()
 
     feature_importances = pd.read_csv('data/feature_importances.csv')
 
-    # plot_segments(i_compiled,
-    #     'One Hour Interictal (Baseline) Recording',
-    #     'b',
-    #     'figures/interictal.png')
-    #
-    # plot_segments(p_compiled,
-    #     'One Hour Preictal (pre-seizure) Recording',
-    #     'r',
-    #     'figures/preictal.png')
+    plot_segments(i_compiled,
+        'One Hour Interictal (Baseline) Recording',
+        'b',
+        'figures/interictal.png')
+
+    plot_segments(p_compiled,
+        'One Hour Preictal (pre-seizure) Recording',
+        'r',
+        'figures/preictal.png')
 
     plot_feature_importance(feature_importances,
         'figures/feature_importance.png')
 
-    # plot_kde(i_compiled.flatten(),
-    #     p_compiled.flatten(),
-    #     'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-    #     'figures/kde.png')
-    #
-    # plot_channel_kde(i_compiled,
-    #     p_compiled,
-    #     'Kernel Density Plots by Channel Pre- and Interictal',
-    #     'figures/kde2.png')
-    #
-    # wavelet_spectrogram(i_compiled,
-    #     'Interictal Wavelet Spectrogram from Channel 16',
-    #     'figures/spectrogram_i.png')
-    #
-    # wavelet_spectrogram(p_compiled,
-    #     'Preictal Wavelet Spectrogram from Channel 16',
-    #     'figures/spectrogram_p.png')
+    plot_kde(i_compiled.flatten(),
+        p_compiled.flatten(),
+        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+        'figures/kde.png')
+
+    plot_channel_kde(i_compiled,
+        p_compiled,
+        'Kernel Density Plots by Channel Pre- and Interictal',
+        'figures/kde2.png')
+
+    wavelet_spectrogram(i_compiled,
+        'Interictal Wavelet Spectrogram from Channel 16',
+        'figures/spectrogram_i.png')
+
+    wavelet_spectrogram(p_compiled,
+        'Preictal Wavelet Spectrogram from Channel 16',
+        'figures/spectrogram_p.png')
