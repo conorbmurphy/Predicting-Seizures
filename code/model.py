@@ -78,7 +78,10 @@ class Models(object):
         '''
         self.y = np.array(self.data.pop(self.data.columns[-1]))
         self.X_train, self.X_test, self.y_train, self.y_test = \
-               train_test_split(np.array(self.data), self.y, test_size=0.4)
+               train_test_split(np.array(self.data),
+               self.y,
+               test_size=0.3,
+               random_state=123)
         print '-------- Train/Test Split Complete --------'
 
 
@@ -89,15 +92,6 @@ class Models(object):
             Normalizes both training and test data by subtracting the mean and
                 dividing by the std. Also adds dummies for patient number
     	'''
-    	# X_patient = self.X[:,-1]
-    	# test_set_patient = self.test_set[:,-1]
-        #
-    	# self.X = ((self.X - self.X.mean(axis=0)) / self.X.std(axis=0))[:,:-1]
-    	# self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
-        #
-    	# self.X = np.concatenate([self.X, pd.get_dummies(X_patient)], axis=1)
-    	# self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
-
     	X_train_patient = self.X_train[:,-1]
     	X_test_patient = self.X_test[:,-1]
     	#test_set_patient = self.test_set[:,-1]
@@ -300,6 +294,22 @@ class Models(object):
         model.fit(x, y)
         return model.feature_importances_
 
+
+def morlet(n_points, a):
+    '''
+    INPUT:
+        n_points: int - Number of points in vector.  Will be centered around 0.  In
+        	scipy.signal.cwt, this will be the nubmer of points that the returned vector
+        	will have
+        a: scalar - width parameter of the wavelet, defining its size
+    OUTPUT: vector: Normalized array of length n_points in shape of a morlet wavelet
+
+    equation = pi**-0.25 * (exp(1j*w*x) - exp(-0.5*(w**2))) * exp(-0.5*(x**2))
+    '''
+    vec = np.linspace(-10, 10, n_points)
+    wave = (np.pi**-0.25) * (np.exp(-0.5*vec**2))*(np.exp(-1j*a*vec) - np.exp(-0.5*a**2))
+
+    return wave/np.sum(wave*np.conj(wave)).real
 
 
 def create_submission(predict_a, file_name):

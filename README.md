@@ -34,15 +34,11 @@ Exploratory analysis reveals a few patterns to be explored in greater detail in 
 
 In the above plots, we can draw attention to some of the general features I focus on in my model.  In recordings not followed by a seizure, we see higher frequency brain activity.  By contrast, the preictal recording shows lower frequency activity.
 
-![KDE Plot](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/kde2.png)
-
-* Figure 3: In the above kernel density estimator plot we can see that most channels have higher frequency activity in non-seizure activity compared to pre-seizure brain states
-
 ## Feature Building
 
 I built features surrounding a variety of hypotheses, each will be explored in detail below.
 
-FEATURE IMPORTANCE CHART
+FEATURE IMPORTANCE CHART combined wavelets, MOM, entropy, and correlations
 
 ### Wavelet Transformation
 
@@ -83,24 +79,25 @@ In addition to the above, I calculated variations on the method of moments inclu
 
 ## Modeling
 
+After building the features described above, I built a model that took int account unbalanced classes (around 90% of the data is interictal), missing data and normalization.
+
 Modeling on just the last segment-how did that work?
 Techniques tried - RF, SVM, LR, XGB
 Dimensionality reduction
 Imbalanced classes
 ROC curves
 
-Scores were calculated using 5-fold cross-validation on the area under the ROC curve.  The resulsts are as follows.
+Scores were calculated using 5-fold cross-validation on the area under the ROC curve.  The results are as follows.
+
+Pull scores for validation set
 
 | Patient    | Logistic Regression | Random Forest | XGBoost | SVM   |
 | ---------- |:-------------------:|:-------------:|:-------:|:-----:|
-| Combined   | 0.84                | 0.88          | 0.87    | 0.81  |
-| A          |                     |               |         |       |
-| B          |                     |               |         |       |
-| C          |                     |               |         |       |
+| Combined   | 0.84                | 0.88          | 0.87    | 0.84  |
+| A          | 0.80                | 0.86          | 0.90    | 0.85  |
+| B          | 0.84                | 0.83          | 0.83    | 0.82  |
+| C          | 0.86                | 0.91          | 0.94    | 0.87  |
 
-## Next steps
-
-Pulling activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
 
 ## Reproducing my Analysis
 
@@ -111,6 +108,18 @@ Since this analysis takes a few hours, I saved the consolidated files to the dat
 The model can be run using `model.py`
 
 The figures present in this file can be recreated by running `visualizations.py`
+
+## Next steps
+
+Considering that the data set only includes base iEEG recordings, there are a few steps that could create a more accurate prediction by using side data.
+
+1. A metric for the severity of a patient's epilepsy could create a more or less sensitive alert threshold.
+2. A callibration protocol could allow the users with similar brain activity to be clustered.  For instance, this could be accomplished by asking them to perform certain mental tasks in order to get a better idea for what the range of their baseline, normal brain activity.
+3. Using activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
+
+In addition to the models I tried, convolutional neural nets have been shown to be effective with this type of data.  Experimenting with other wavelets such as the Morlet could also yeild different results in the wavelet transformation.  A draft function to be used Scipy's `cwt()` function can be called with `from code.model import morlet`
+
+
 
 ## Acknowledgements
 

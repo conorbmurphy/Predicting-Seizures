@@ -5,7 +5,7 @@ from os import listdir
 import pandas as pd
 from scipy import signal
 from scipy.io import loadmat
-from scipy.stats import kurtosis, skew, pearsonr, entropy, gaussian_kde
+from scipy.stats import kurtosis, skew, pearsonr, gaussian_kde
 
 
 class Features(object):
@@ -179,16 +179,18 @@ class Features(object):
             Saves 16 channel entropies to self.entropies, zeros if empty dataset
         '''
         entropies = []
-	length = self.temp_mat2.shape[0]/1E5
-	try:
-		for col in range(16):
-			kde = gaussian_kde(self.temp_mat2[:,col])
-			r = np.linspace(min(self.temp_mat2[:,col]),\
-	                max(self.temp_mat2[:,col]), length)
-			entropies.append(entropy(kde.evaluate(r)))
-	        return np.array(entropies).reshape(1,-1)
-	except ValueError:
-		return np.zeros(16).reshape(1, -1)
+    	# length = self.temp_mat2.shape[0]/1E5
+    	try:
+    		for col in range(16):
+    			kde = gaussian_kde(self.temp_mat2[:,col])
+    			r = np.linspace(min(self.temp_mat2[:,col]),\
+    	                max(self.temp_mat2[:,col]), 20)
+                delt = r[1] - r[0]
+                entropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
+    			# entropies.append(entropy(kde.evaluate(r)))
+    	    return np.array(entropies).reshape(1,-1)
+    	except ValueError:
+    		return np.zeros(16).reshape(1, -1)
 
 
     def correlate(self):

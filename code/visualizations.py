@@ -103,36 +103,19 @@ def return_frequencies():
     return frequencies
 
 
-def continuous_wavelet_tranformation(channel):
-    '''
-    INPUT: One channel of a recording
-    OUTPUT: returns wavelet transformation
-    '''
-    freq = return_frequencies()
-    return signal.cwt(channel, signal.ricker, freq)
-
-
-
 def wavelet_spectrogram(mat, title, name):
-
-    # pool = multiprocessing.Pool(40)
-    # output = pool.map(continuous_wavelet_tranformation, mat.T)
-    freq = return_frequencies()
+    '''
+    INPUT: iEEG recording as a numpy array, plot title and new file name
+    OUTPUT: None, saves imate
+    '''
+    plt.figure(figsize=(10, 5))
+        freq = return_frequencies()
     result = signal.cwt(mat[:,15], signal.ricker, freq)
-    #for i in range(16):
-    #    if i == 0:
-    #        result = signal.cwt(mat[:,i], signal.ricker, freq)
-    #    else:
-    #        result += signal.cwt(mat[:,i], signal.ricker, freq)
-    # result = output[0]
-    # for i in result[1:]:
-	# result += i
-    # result = result.T / float(16)
-    # result = result / float(16)
-    print 'Dimensions of result are {}'.format(result.shape)
     plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
     plt.suptitle(title)
+    plt.xlabel('Time (observations sampled at 400 hz)')
+    plt.ylabel('Frequency (hz)')
     plt.savefig(name)
 
 
@@ -142,29 +125,30 @@ if __name__ == '__main__':
 
     df_concat, test_concat = import_data()
 
-    # plot_segments(i_compiled,
-    #     'One Hour Interictal (Baseline) Recording',
-    #     'b',
-    #     'figures/interictal.png')
-    # plot_segments(p_compiled,
-    #     'One Hour Preictal (pre-seizure) Recording',
-    #     'r',
-    #     'figures/preictal.png')
-    #
-    # plot_kde(i_compiled.flatten(),
-    #     p_compiled.flatten(),
-    #     'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-    #     'figures/kde.png')
-    #
-    # plot_channel_kde(i_compiled,
-    #     p_compiled,
-    #     'Kernel Density Plots by Channel Pre- and Interictal',
-    #     'figures/kde2.png')
-    #
-    # wavelet_spectrogram(i_compiled,
-    #     'Interictal Wavelet Spectrogram from Channel 16',
-    #     'figures/spectrogram_i.png')
-    #
-    # wavelet_spectrogram(p_compiled,
-    #     'Preictal Wavelet Spectrogram from Channel 16',
-    #     'figures/spectrogram_p.png')
+    plot_segments(i_compiled,
+        'One Hour Interictal (Baseline) Recording',
+        'b',
+        'figures/interictal.png')
+
+    plot_segments(p_compiled,
+        'One Hour Preictal (pre-seizure) Recording',
+        'r',
+        'figures/preictal.png')
+
+    plot_kde(i_compiled.flatten(),
+        p_compiled.flatten(),
+        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+        'figures/kde.png')
+
+    plot_channel_kde(i_compiled,
+        p_compiled,
+        'Kernel Density Plots by Channel Pre- and Interictal',
+        'figures/kde2.png')
+
+    wavelet_spectrogram(i_compiled,
+        'Interictal Wavelet Spectrogram from Channel 16',
+        'figures/spectrogram_i.png')
+
+    wavelet_spectrogram(p_compiled,
+        'Preictal Wavelet Spectrogram from Channel 16',
+        'figures/spectrogram_p.png')
