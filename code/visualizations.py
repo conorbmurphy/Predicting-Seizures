@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from itertools import combinations
 import numpy as np
-import seaborn as sns
+#import seaborn as sns
 from scipy.io import loadmat
 from scipy import signal
 import multiprocessing
@@ -29,7 +29,7 @@ def compile_files(interictal, preictal):
     INPUT: lists of file names for interictal and preictal recordings
     OUTPUT: compiled recordings across segments
     '''
-    file = '../data/train_'+interictal[0][0]+'/'
+    file = '/data/train_'+interictal[0][0]+'/'
     i_files = []
     p_files = []
     for i_file, p_file in zip(interictal, preictal):
@@ -114,15 +114,18 @@ def continuous_wavelet_tranformation(channel):
 
 def wavelet_spectrogram(mat, title, name):
 
-    result = np.array([])
-    pool = multiprocessing.Pool(4)
+    pool = multiprocessing.Pool(40)
     output = pool.map(continuous_wavelet_tranformation, mat.T)
     # for i in range(16):
     #     if result.shape[0] == 0:
     #         result = signal.cwt(mat[:,i], signal.ricker, freq)
     #     else:
     #         result += signal.cwt(mat[:,i], signal.ricker, freq)
-    result = np.sum(output).T / float(16)
+    result = output[0]
+    for i in result[1:]:
+	result += i
+    result = result.T / float(16)
+    print 'Dimensions of result are {}'.format(result.shape)
     plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
     plt.suptitle(title)
