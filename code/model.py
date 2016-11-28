@@ -49,7 +49,7 @@ class Models(object):
             4) removing zeros (if helpful)
     	'''
     	print '-------- Beginning Transformation --------'
-        self.remove_zeros() # does this cause a reduction in the score?
+        # self.remove_zeros() # does this cause a reduction in the score?
     	self.tt_split()
     	self.normalize_and_add_dummies()
     	print '-------- Tranformation Complete --------'
@@ -289,6 +289,17 @@ class Models(object):
         plt.legend(loc="lower right")
         plt.show()
 
+    def get_feature_importances(df):
+        '''
+        INPUT: data frame
+        OUTPUT: feature importances using random forest
+        '''
+        x = np.concatenate([self.X_train, self.X_test])
+        y = np.concatenate([self.y_train, self.y_test])
+        model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
+        model.fit(x, y)
+        return model.feature_importances_
+
 
 
 def create_submission(predict_a, file_name):
@@ -343,14 +354,14 @@ if __name__ == '__main__':
     a_df, b_df, c_df, a_test, b_test, c_test = import_data(separate=True)
 
     com = Models('combined', df_concat, test_concat)
-    am = Models('A', a_df, a_test)
-    bm = Models('B', b_df, b_test)
-    cm = Models('C', c_df, c_test)
+    # am = Models('A', a_df, a_test)
+    # bm = Models('B', b_df, b_test)
+    # cm = Models('C', c_df, c_test)
 
     com.fit()
-    am.fit()
-    bm.fit()
-    cm.fit()
+    # am.fit()
+    # bm.fit()
+    # cm.fit()
 
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
