@@ -1,13 +1,16 @@
 ### CHANGE / IN COMPILE_FILES
 
-from scipy.io import loadmat
-# import matplotlib
-# matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from itertools import combinations
 import numpy as np
 import seaborn as sns
+from scipy.io import loadmat
+from scipy import signal
+import multiprocessing
+
 
 def file_names(patient_no):
     '''
@@ -79,25 +82,80 @@ def plot_channel_kde(interictal_sample, preictal_sample, title, name):
     plt.suptitle(title)
     plt.savefig(name)
 
+def return_frequencies():
+    '''
+    INPUT: None
+    OUTPUT: numpy array of 25 frequencies spaced 5 each over the common
+        brain activity wavelengths:
+            delta: < 4 hz
+            theta: >= 4 hz & < 8 hz
+            alpha: >= 8 hz & < 14 hz
+            beta:  >= 14 hz & < 32 hz
+            gamma: >= 14 hz
+    '''
+    frequencies = np.concatenate([\
+            np.linspace(300, 100, 5), # delta waves
+            np.linspace(95, 57, 5), # theta waves
+            np.linspace(55, 27, 5), # alpha waves
+            np.linspace(25, 13, 5), # beta waves
+            np.linspace(12, 2, 5)]) # gamma waves
+    return frequencies
+
+
+def continuous_wavelet_tranformation(channel):
+    '''
+    INPUT: One channel of a recording
+    OUTPUT: returns wavelet transformation
+    '''
+    freq = return_frequencies()
+    return signal.cwt(channel, signal.ricker, freq)
+
+
+
+def wavelet_spectrogram(mat, title, name):
+
+    result = np.array([])
+    pool = multiprocessing.Pool(4)
+    output = pool.map(continuous_wavelet_tranformation, mat.T)
+    # for i in range(16):
+    #     if result.shape[0] == 0:
+    #         result = signal.cwt(mat[:,i], signal.ricker, freq)
+    #     else:
+    #         result += signal.cwt(mat[:,i], signal.ricker, freq)
+    result = np.sum(output).T / float(16)
+    plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
+        aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
+    plt.suptitle(title)
+    plt.savefig(name)
+
+
 if __name__ == '__main__':
     interictal, preictal = file_names(1)
     i_compiled, p_compiled = compile_files(interictal, preictal)
 
-    plot_segments(i_compiled,
-        'One Hour Interictal (Baseline) Recording',
-        'b',
-        'figures/interictal.png')
-    plot_segments(p_compiled,
-        'One Hour Preictal (pre-seizure) Recording',
-        'r',
-        'figures/preictal.png')
+    # plot_segments(i_compiled,
+    #     'One Hour Interictal (Baseline) Recording',
+    #     'b',
+    #     'figures/interictal.png')
+    # plot_segments(p_compiled,
+    #     'One Hour Preictal (pre-seizure) Recording',
+    #     'r',
+    #     'figures/preictal.png')
+    #
+    # plot_kde(i_compiled.flatten(),
+    #     p_compiled.flatten(),
+    #     'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+    #     'figures/kde.png')
+    #
+    # plot_channel_kde(i_compiled,
+    #     p_compiled,
+    #     'Kernel Density Plots by Channel Pre- and Interictal',
+    #     'figures/kde2.png')
 
-    plot_kde(i_compiled.flatten(),
-        p_compiled.flatten(),
-        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-        'figures/kde.png')
+    wavelet_spectrogram(i_compiled,
+        'Interictal Wavelet Spectrogram',
+        'figures/spectrogram_i.png')
 
-    plot_channel_kde(i_compiled,
-        p_compiled,
-        'Kernel Density Plots by Channel Pre- and Interictal',
-        'figures/kde2.png')
+    wavelet_spectrogram(p_compiled,
+        'Preictal Wavelet Spectrogram',
+        'figures/spectrogram_p.png')

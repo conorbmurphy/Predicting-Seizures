@@ -40,7 +40,7 @@ In the above plots, we can draw attention to some of the general features I focu
 
 ### Wavelet Transformation
 
-Given that the frequency of brain electrical activity appears to correlate with whether a seizure is immanent, I performed a wavelet transformation on data with five transformations for each of the common wavelengths:
+Given that the frequency of brain electrical activity appears to correlate with whether a seizure is immanent, I performed a wavelet transformation on data with five transformations within the bounds of each of the common wavelengths:
 
 | Wavelength        |      Frequency (hz)      |
 | ------------- |:-------------:|
@@ -50,7 +50,7 @@ Given that the frequency of brain electrical activity appears to correlate with 
 | beta |    >= 14 hz & < 32 hz   |
 | gamma |    >= 14 hz   |
 
-
+A wavelet spectrogram demonstrates which wavelengths are active for interictal and preictal recordings.
 
 ### Channel Correlation
 
