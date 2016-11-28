@@ -283,7 +283,7 @@ class Models(object):
         plt.legend(loc="lower right")
         plt.show()
 
-    def get_feature_importances(self, save_dest=None):
+    def get_feature_importances(self, dest_file=None):
         '''
         INPUT: Save, optional, destination to save file
         OUTPUT: pandas data frame of sorted feature importances.
@@ -305,7 +305,7 @@ class Models(object):
                 columns=['Feature', 'Value'])\
                 .sort_values('Value', ascending=False) \
                 .reset_index(drop=True)
-        if save_dest:
+        if dest_file:
             df.to_csv(dest_file, index=False)
         return df
 
@@ -387,7 +387,7 @@ if __name__ == '__main__':
     bm.fit()
     cm.fit()
 
-    com.get_feature_importances(save_dest='data/feature_importances.csv')
+    com.get_feature_importances('data/feature_importances.csv')
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
 

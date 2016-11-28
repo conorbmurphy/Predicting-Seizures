@@ -83,6 +83,20 @@ def plot_channel_kde(interictal_sample, preictal_sample, title, name):
     plt.suptitle(title)
     plt.savefig(name)
 
+def plot_feature_importance(df, name):
+    '''
+    INPUT: Data frame of feature importances
+    OUTPUT: None, saves plot
+    '''
+    plt.figure(figsize=(10, 5))
+    pos = np.arange(6)[::-1]+.5
+    plt.barh(pos, df['Value'], align='center', color='#71EEB8')
+    plt.yticks(pos, df['Feature'], size='x-small')
+    plt.xlabel('Importance', size='smaller')
+    plt.suptitle('Feature Importance by Feature Type')
+    plt.savefig(name)
+
+
 def return_frequencies():
     '''
     INPUT: None
@@ -125,6 +139,8 @@ if __name__ == '__main__':
 
     df_concat, test_concat = import_data()
 
+    feature_importances = pd.read_csv('data/feature_importances.csv')
+
     plot_segments(i_compiled,
         'One Hour Interictal (Baseline) Recording',
         'b',
@@ -135,10 +151,20 @@ if __name__ == '__main__':
         'r',
         'figures/preictal.png')
 
+<<<<<<< HEAD
     #plot_kde(i_compiled.flatten(),
     #    p_compiled.flatten(),
     #    'Kernel Density Plot of One Hour Recording Pre- and Interictal',
     #    'figures/kde.png')
+=======
+    plot_feature_importance(feature_importances,
+        'figures/feature_importance.png')
+
+    plot_kde(i_compiled.flatten(),
+        p_compiled.flatten(),
+        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+        'figures/kde.png')
+>>>>>>> 30c7c24e3a97324375ebb93027cfbd2089524674
 
     #plot_channel_kde(i_compiled,
     #    p_compiled,

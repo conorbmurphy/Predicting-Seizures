@@ -36,9 +36,20 @@ In the above plots, we can draw attention to some of the general features I focu
 
 ## Feature Building
 
-I built features surrounding a variety of hypotheses, each will be explored in detail below.
+I built features surrounding a variety of hypotheses, each will be explored in detail below.  The features were in five basic categories creating a total of 819 features for the final model:
 
-FEATURE IMPORTANCE CHART combined wavelets, MOM, entropy, and correlations
+* 160 channel means
+* 400 wavelet transformations
+* 118 method of moments calculations
+* 16 entropy calculations
+* 122 correlations
+* 3 patient number dummies
+
+The final importances are as follows:
+
+![Feature Importance](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/feature_importance.png)
+
+* Figure 3: Importances of the categories of features.
 
 ### Wavelet Transformation
 
