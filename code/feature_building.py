@@ -27,6 +27,8 @@ class Features(object):
         self.entropies = None
         self.correlations = None
 
+	self.isempty = False
+
         self.fit()
 
     def fit(self):
@@ -34,7 +36,9 @@ class Features(object):
         self.load_file()
 
 	if self.temp_mat[0].sum() != 0:
-	        self.metadata()
+		self.isempty = True
+
+	self.metadata()
 
 
     def load_file(self):
@@ -173,13 +177,13 @@ class Features(object):
             Saves 16 channel entropies to self.entropies, zeros if empty dataset
         '''
         entropies = []
-	    length = self.temp_mat2.shape[0]/1E5
-	    try:
-	        for col in range(16):
-	            kde = gaussian_kde(self.temp_mat2[:,col])
-	            r = np.linspace(min(self.temp_mat2[:,col]),\
+	length = self.temp_mat2.shape[0]/1E5
+	try:
+		for col in range(16):
+			kde = gaussian_kde(self.temp_mat2[:,col])
+			r = np.linspace(min(self.temp_mat2[:,col]),\
 	                max(self.temp_mat2[:,col]), length)
-	            entropies.append(entropy(kde.evaluate(r)))
+			entropies.append(entropy(kde.evaluate(r)))
 	        return np.array(entropies).reshape(1,-1)
 	except ValueError:
 		return np.zeros(16).reshape(1, -1)
@@ -206,31 +210,34 @@ class Features(object):
         INPUT: None
         OUTPUT: Combined results
         '''
-        try:
-        	if self.clas:
-        		result = np.concatenate([\
-                    self.channel_means(),
-                    self.wavelet_transformation(),
-                    self.method_of_moments(),
-                    self.entropize(),
-                    self.correlate(),
-                    np.array([\
-                        self.patient,
-                        self.id,
-                        self.sequence,
-                        self.contaminated,
-                        self.clas]).reshape(1,-1)], axis=1)
-        	else:
-        		  result = np.concatenate([\
-                    self.channel_means(),
-                    self.wavelet_transformation(),
-                    self.method_of_moments(),
-                    self.entropize(),
-                    self.correlate(),
-                    np.array([\
-                        self.patient,
-                        self.id]).reshape(1,-1)], axis=1)
-        	return result.flatten().reshape(1,-1)
+	try:
+		if self.clas:
+			result = np.concatenate([\
+				self.channel_means(),
+				self.wavelet_transformation(),
+ 				self.method_of_moments(),
+				self.entropize(),
+				self.correlate(),
+				np.array([\
+					self.patient,
+					self.id,
+					self.sequence,
+					self.contaminated,
+					self.clas]).reshape(1,-1)], axis=1)
+			return result.flatten().reshape(1,-1)
+		elif self.isempty == False:
+			result = np.concatenate([\
+				self.channel_means(),
+                    		self.wavelet_transformation(),
+                    		self.method_of_moments(),
+                    		self.entropize(),
+                    		self.correlate(),
+				np.array([\
+                        		self.patient,
+                        		self.id]).reshape(1,-1)], axis=1)
+			return result.flatten().reshape(1,-1)
+		else:
+			return np.ones(821)*-1
         except (ValueError, TypeError):
         	print 'Unable to process {} due to ValueError or TypeError, returning negative ones'\
                 .format(self.file_name)
