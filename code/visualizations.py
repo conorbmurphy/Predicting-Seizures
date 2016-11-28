@@ -120,7 +120,7 @@ def return_frequencies():
 def wavelet_spectrogram(mat, title, name):
     '''
     INPUT: iEEG recording as a numpy array, plot title and new file name
-    OUTPUT: None, saves imate
+    OUTPUT: None, saves plot
     '''
     plt.figure(figsize=(10, 5))
     freq = return_frequencies()
@@ -132,6 +132,15 @@ def wavelet_spectrogram(mat, title, name):
     plt.ylabel('Frequency (hz)')
     plt.savefig(name)
 
+def plot_correlations(mat, title, name):
+    '''
+    INPUT: recording, title, and destination file name
+    OUTPUT: None, saves plot
+    '''
+    plt.figure(figsize=(10, 5))
+    sns.heatmap(pd.DataFrame(mat).corr())
+    plt.suptitle(title)
+    plt.savefig(name)
 
 if __name__ == '__main__':
     interictal, preictal = file_names(1)
@@ -151,12 +160,6 @@ if __name__ == '__main__':
         'r',
         'figures/preictal.png')
 
-<<<<<<< HEAD
-    #plot_kde(i_compiled.flatten(),
-    #    p_compiled.flatten(),
-    #    'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-    #    'figures/kde.png')
-=======
     plot_feature_importance(feature_importances,
         'figures/feature_importance.png')
 
@@ -164,7 +167,6 @@ if __name__ == '__main__':
         p_compiled.flatten(),
         'Kernel Density Plot of One Hour Recording Pre- and Interictal',
         'figures/kde.png')
->>>>>>> 30c7c24e3a97324375ebb93027cfbd2089524674
 
     #plot_channel_kde(i_compiled,
     #    p_compiled,
@@ -178,3 +180,11 @@ if __name__ == '__main__':
     wavelet_spectrogram(p_compiled,
         'Preictal Wavelet Spectrogram from Channel 16',
         'figures/spectrogram_p.png')
+
+    plot_correlations(i_compiled,
+        'Interictal Channel Coorelations',
+        'figures/coorelations_i.png')
+
+    plot_correlations(p_compiled,
+        'Precital Channel Coorelations',
+        'figures/coorelations_p.png')

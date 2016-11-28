@@ -71,7 +71,9 @@ A wavelet spectrogram demonstrates which wavelengths are active for interictal a
 
 ### Channel Correlation
 
-HEATMAP OF CORRELATIONS
+![Interictal Channel Correlations](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/coorelations_i.png)
+
+![Preictal Channel Correlations](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/coorelations_p.png)
 
 ### Entropy
 
