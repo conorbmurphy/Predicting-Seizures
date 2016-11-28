@@ -116,7 +116,7 @@ def wavelet_spectrogram(mat, title, name):
 
     # pool = multiprocessing.Pool(40)
     # output = pool.map(continuous_wavelet_tranformation, mat.T)
-
+    freq = return_frequencies()
     result = np.array([])
     for i in range(16):
         if i == 0:
