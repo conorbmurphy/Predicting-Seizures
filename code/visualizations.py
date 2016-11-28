@@ -127,7 +127,7 @@ def wavelet_spectrogram(mat, title, name):
     # for i in result[1:]:
 	# result += i
     # result = result.T / float(16)
-    result = result / float(16)
+    # result = result / float(16)
     print 'Dimensions of result are {}'.format(result.shape)
     plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
