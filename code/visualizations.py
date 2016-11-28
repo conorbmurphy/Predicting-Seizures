@@ -83,6 +83,20 @@ def plot_channel_kde(interictal_sample, preictal_sample, title, name):
     plt.suptitle(title)
     plt.savefig(name)
 
+def plot_feature_importance(df, name):
+    '''
+    INPUT: Data frame of feature importances
+    OUTPUT: None, saves plot
+    '''
+    plt.figure(figsize=(10, 5))
+    pos = np.arange(6)[::-1]+.5
+    plt.barh(pos, df['Value'], align='center', color='#71EEB8')
+    plt.yticks(pos, df['Feature'], size='x-small')
+    plt.xlabel('Importance', size='smaller')
+    plt.suptitle('Feature Importance by Feature Type')
+    plt.savefig(name)
+
+
 def return_frequencies():
     '''
     INPUT: None
@@ -109,7 +123,7 @@ def wavelet_spectrogram(mat, title, name):
     OUTPUT: None, saves imate
     '''
     plt.figure(figsize=(10, 5))
-        freq = return_frequencies()
+    freq = return_frequencies()
     result = signal.cwt(mat[:,15], signal.ricker, freq)
     plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
@@ -120,35 +134,40 @@ def wavelet_spectrogram(mat, title, name):
 
 
 if __name__ == '__main__':
-    interictal, preictal = file_names(1)
-    i_compiled, p_compiled = compile_files(interictal, preictal)
+    # interictal, preictal = file_names(1)
+    # i_compiled, p_compiled = compile_files(interictal, preictal)
+    #
+    # df_concat, test_concat = import_data()
 
-    df_concat, test_concat = import_data()
+    feature_importances = pd.read_csv('data/feature_importances.csv')
 
-    plot_segments(i_compiled,
-        'One Hour Interictal (Baseline) Recording',
-        'b',
-        'figures/interictal.png')
+    # plot_segments(i_compiled,
+    #     'One Hour Interictal (Baseline) Recording',
+    #     'b',
+    #     'figures/interictal.png')
+    #
+    # plot_segments(p_compiled,
+    #     'One Hour Preictal (pre-seizure) Recording',
+    #     'r',
+    #     'figures/preictal.png')
 
-    plot_segments(p_compiled,
-        'One Hour Preictal (pre-seizure) Recording',
-        'r',
-        'figures/preictal.png')
+    plot_feature_importance(feature_importances,
+        'figures/feature_importance.png')
 
-    plot_kde(i_compiled.flatten(),
-        p_compiled.flatten(),
-        'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-        'figures/kde.png')
-
-    plot_channel_kde(i_compiled,
-        p_compiled,
-        'Kernel Density Plots by Channel Pre- and Interictal',
-        'figures/kde2.png')
-
-    wavelet_spectrogram(i_compiled,
-        'Interictal Wavelet Spectrogram from Channel 16',
-        'figures/spectrogram_i.png')
-
-    wavelet_spectrogram(p_compiled,
-        'Preictal Wavelet Spectrogram from Channel 16',
-        'figures/spectrogram_p.png')
+    # plot_kde(i_compiled.flatten(),
+    #     p_compiled.flatten(),
+    #     'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+    #     'figures/kde.png')
+    #
+    # plot_channel_kde(i_compiled,
+    #     p_compiled,
+    #     'Kernel Density Plots by Channel Pre- and Interictal',
+    #     'figures/kde2.png')
+    #
+    # wavelet_spectrogram(i_compiled,
+    #     'Interictal Wavelet Spectrogram from Channel 16',
+    #     'figures/spectrogram_i.png')
+    #
+    # wavelet_spectrogram(p_compiled,
+    #     'Preictal Wavelet Spectrogram from Channel 16',
+    #     'figures/spectrogram_p.png')
