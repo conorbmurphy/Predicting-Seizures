@@ -52,13 +52,27 @@ Given that the frequency of brain electrical activity appears to correlate with 
 
 A wavelet spectrogram demonstrates which wavelengths are active for interictal and preictal recordings.
 
+![Interictal Wavelet Spectrogram](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/spectrogram_i.png)
+
+![Preictal Wavelet Spectrogram](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/spectrogram_p.png)
+
 ### Channel Correlation
 
 Make heatmap of correlations
 
-### Other Features?  MOM?  Entropy
+### Entropy
 
-## Feature Building
+### Method of Moments
+
+In addition to the above, I calculated variations on the method of moments including the following:
+
+1. Channel mean for the entire recording and in 1-minute segments
+2. Variance (channel and total)
+3. Channel skew
+4. Channel kurtosis
+5. Channel and total minimum, maximums and medians
+
+## Feature Importance
 
 List of features
 Why
@@ -76,6 +90,10 @@ ROC curves
 ## Key Findings
 
 ## Next steps
+
+Pulling activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
+
+## Reproducing my Analysis
 
 ## Acknowledgements
 

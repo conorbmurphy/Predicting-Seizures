@@ -340,13 +340,13 @@ def import_data(separate=False):
     INPUT: separate - Boolean, whether to return concatenated or separate data frames
     OUTPUT: combined training and test sets
     '''
-    a_df = pd.read_csv('data/a_reduced16.csv')
-    b_df = pd.read_csv('data/b_reduced16.csv')
-    c_df = pd.read_csv('data/c_reduced16.csv')
+    a_df = pd.read_csv('data/a_reduced17.csv')
+    b_df = pd.read_csv('data/b_reduced17.csv')
+    c_df = pd.read_csv('data/c_reduced17.csv')
 
-    a_df = a_df[a_df['820'] == False].drop(['818', '819', '820'], axis=1)
-    b_df = b_df[b_df['820'] == False].drop(['818', '819', '820'], axis=1)
-    c_df = c_df[c_df['820'] == False].drop(['818', '819', '820'], axis=1)
+    a_df = a_df[a_df['819'] == False].drop(['817', '818', '819'], axis=1)
+    b_df = b_df[b_df['819'] == False].drop(['817', '818', '819'], axis=1)
+    c_df = c_df[c_df['819'] == False].drop(['817', '818', '819'], axis=1)
 
     a_test = pd.read_csv('data/a_test_reduced16.csv').sort_values(by='818')\
         .drop('818', axis=1)

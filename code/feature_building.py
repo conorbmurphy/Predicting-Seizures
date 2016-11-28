@@ -20,6 +20,7 @@ class Features(object):
         self.clas = None
         self.contaminated = None
         self.sequence = None
+        self.istest = False # defaults to false unless changed
 
         self.means = None
         self.wavelets = None
@@ -27,7 +28,7 @@ class Features(object):
         self.entropies = None
         self.correlations = None
 
-	self.isempty = False
+        self.isempty = False
 
         self.fit()
 
@@ -35,10 +36,10 @@ class Features(object):
         print 'Fitting {}'.format(self.file_name)
         self.load_file()
 
-	if self.temp_mat[0].sum() != 0:
-		self.isempty = True
+        if self.temp_mat[0].sum() != 0:
+		          self.isempty = True
 
-	self.metadata()
+	    self.metadata()
 
 
     def load_file(self):
@@ -70,6 +71,7 @@ class Features(object):
              self.patient, self.id = self.file_name.replace('.', '_')\
                 .replace('/','_').split('_')[6:8]
              self.clas = None # resets class as none
+             self.istest = True
         else:
         	self.sequence = self.temp_mat[4][0][0] # pulls sequence number (only exists in training set)
 
@@ -210,38 +212,40 @@ class Features(object):
         INPUT: None
         OUTPUT: Combined results
         '''
-	try:
-		if self.clas:
-			result = np.concatenate([\
-				self.channel_means(),
-				self.wavelet_transformation(),
- 				self.method_of_moments(),
-				self.entropize(),
-				self.correlate(),
-				np.array([\
-					self.patient,
-					self.id,
-					self.sequence,
-					self.contaminated,
-					self.clas]).reshape(1,-1)], axis=1)
-			return result.flatten().reshape(1,-1)
+        try:
+            if self.clas:
+			    result = np.concatenate([\
+				    self.channel_means(),
+    				self.wavelet_transformation(),
+     				self.method_of_moments(),
+    				self.entropize(),
+    				self.correlate(),
+    				np.array([\
+    					self.patient,
+    					self.id,
+    					self.sequence,
+    					self.contaminated,
+    					self.clas]).reshape(1,-1)], axis=1)
+    			return result.flatten().reshape(1,-1)
 		elif self.isempty == False:
-			result = np.concatenate([\
-				self.channel_means(),
+		        result = np.concatenate([\
+				            self.channel_means(),
                     		self.wavelet_transformation(),
                     		self.method_of_moments(),
                     		self.entropize(),
                     		self.correlate(),
-				np.array([\
+				            np.array([\
                         		self.patient,
                         		self.id]).reshape(1,-1)], axis=1)
-			return result.flatten().reshape(1,-1)
-		else:
-			return np.ones(821)*-1
+		        return result.flatten().reshape(1,-1)
+		elif self.istest == False:
+			    return (np.ones(821)*-1).reshape(1,-1)
+        else:
+                return (np.ones(818)*-1).reshape(1,-1)
         except (ValueError, TypeError):
         	print 'Unable to process {} due to ValueError or TypeError, returning negative ones'\
                 .format(self.file_name)
-        	return np.ones(821)*-1
+        	return (np.ones(821)*-1).reshape(1,-1)
 
 
     def _return_frequencies(self):
