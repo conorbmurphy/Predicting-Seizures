@@ -80,32 +80,6 @@ class Models(object):
         self.X_train, self.X_test, self.y_train, self.y_test = \
                train_test_split(np.array(self.data), self.y, test_size=0.4)
         print '-------- Train/Test Split Complete --------'
-	# group_kfold = GroupKFold(n_splits=3)
-	# self.y = np.array(self.data.pop(self.data.columns[-1]))
-	# self.X = np.array(self.data)
-    #
-	# for train_index, test_index in group_kfold.split(self.X, self.y, self.groups):
-	# 	self.train_indexes.append(train_index)
-	# 	self.test_indexes.append(test_index)
-	# 	#X_train, X_test = self.data[train_index], self.data[test_index]
-	# 	#y_train, y_test = self.data[train_index], self.data[test_index]
-
-        # for i in range(1, 7):
-        #    subset = self.data[self.data['739'] == i]
-        #    if i == 1:
-        #        y = subset.pop(subset.columns[-1])
-        #        self.X_train, self.X_test, self.y_train, self.y_test = \
-        #            train_test_split(subset, y, test_size=0.4)
-        #    else:
-        #        y = subset.pop(subset.columns[-1])
-        #        temp_X_train, temp_X_test, temp_y_train, temp_y_test = \
-        #            train_test_split(subset, y, test_size=0.4)
-        #        self.X_train = np.concatenate([self.X_train, temp_X_train])
-        #        self.X_test = np.concatenate([self.X_test, temp_X_test])
-        #        self.y_train = np.concatenate([self.y_train, temp_y_train])
-        #        self.y_test = np.concatenate([self.y_test, temp_y_test])
-    	# self.X_train = self.X_train[:,:-1] # dropping recording number
-    	# self.X_test = self.X_test[:,:-1]
 
 
     def normalize_and_add_dummies(self):
@@ -126,15 +100,15 @@ class Models(object):
 
     	X_train_patient = self.X_train[:,-1]
     	X_test_patient = self.X_test[:,-1]
-    	test_set_patient = self.test_set[:,-1]
+    	#test_set_patient = self.test_set[:,-1]
 
     	self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
     	self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
-    	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
+    	#self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
 
     	self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
     	self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
-    	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+    	#self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
         print '-------- Normalization and Dummy Adding Complete --------'
 
 
