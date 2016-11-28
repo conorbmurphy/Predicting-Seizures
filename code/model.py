@@ -283,17 +283,31 @@ class Models(object):
         plt.legend(loc="lower right")
         plt.show()
 
-    def get_feature_importances(df):
+    def get_feature_importances(self, save_dest=None):
         '''
-        INPUT: data frame
-        OUTPUT: feature importances using random forest
+        INPUT: Save, optional, destination to save file
+        OUTPUT: pandas data frame of sorted feature importances.
         '''
         x = np.concatenate([self.X_train, self.X_test])
         y = np.concatenate([self.y_train, self.y_test])
         model = RandomForestClassifier(n_estimators=1000, n_jobs=-1, class_weight='balanced')
         model.fit(x, y)
-        return model.feature_importances_
+        fi = model.feature_importances_
 
+        fi_avg = ('Channel Means', fi[:160].sum()) # 160 channel means
+        fi_wav = ('Wavelet Transforms', fi[160:560].sum()) # 400 wavelet transformations
+        fi_mom = ('Method of Moments', fi[560:678].sum()) # 118 MOM calcuations
+        fi_ent = ('Entropy Calculations', fi[678:694].sum()) # 16 entropy
+        fi_cor = ('Pearson Corrleation', fi[694:816].sum()) # 122 correlations
+        fi_pat = ('Patient Numbers', fi[816:].sum()) # 3 patient number dummies
+
+        df = pd.DataFrame([fi_avg, fi_wav, fi_mom, fi_ent, fi_cor, fi_pat],\
+                columns=['Feature', 'Value'])\
+                .sort_values('Value', ascending=False) \
+                .reset_index(drop=True)
+        if save_dest:
+            df.to_csv(dest_file, index=False)
+        return df
 
 def morlet(n_points, a):
     '''
@@ -373,6 +387,7 @@ if __name__ == '__main__':
     bm.fit()
     cm.fit()
 
+    com.get_feature_importances(save_dest='data/feature_importances.csv')
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
 
