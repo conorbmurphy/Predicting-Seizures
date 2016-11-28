@@ -38,6 +38,12 @@ In the above plots, we can draw attention to some of the general features I focu
 
 * Figure 3: In the above kernel density estimator plot we can see that most channels have higher frequency activity in non-seizure activity compared to pre-seizure brain states
 
+## Feature Building
+
+I built features surrounding a variety of hypotheses, each will be explored in detail below.
+
+FEATURE IMPORTANCE CHART
+
 ### Wavelet Transformation
 
 Given that the frequency of brain electrical activity appears to correlate with whether a seizure is immanent, I performed a wavelet transformation on data with five transformations within the bounds of each of the common wavelengths:
@@ -58,9 +64,11 @@ A wavelet spectrogram demonstrates which wavelengths are active for interictal a
 
 ### Channel Correlation
 
-Make heatmap of correlations
+HEATMAP OF CORRELATIONS
 
 ### Entropy
+
+VISUALIZE ENTROPY
 
 ### Method of Moments
 
@@ -72,12 +80,6 @@ In addition to the above, I calculated variations on the method of moments inclu
 4. Channel kurtosis
 5. Channel and total minimum, maximums and medians
 
-## Feature Importance
-
-List of features
-Why
-What worked, what didn't
-Development environment
 
 ## Modeling
 
@@ -87,13 +89,28 @@ Dimensionality reduction
 Imbalanced classes
 ROC curves
 
-## Key Findings
+Scores were calculated using 5-fold cross-validation on the area under the ROC curve.  The resulsts are as follows.
+
+| Patient    | Logistic Regression | Random Forest | XGBoost | SVM   |
+| ---------- |:-------------------:|:-------------:|:-------:|:-----:|
+| Combined   | 0.84                | 0.88          | 0.87    | 0.81  |
+| A          |                     |               |         |       |
+| B          |                     |               |         |       |
+| C          |                     |               |         |       |
 
 ## Next steps
 
 Pulling activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
 
 ## Reproducing my Analysis
+
+I completed my work on a 40-core AWS EC2 instance to take full advantage of parallelizing the computationally demanding parts of this analysis.  The code in `feature_building.py` translates files from the root directory `/data` due to the size of the data set.  It parallelizes the operation across 40 cores and saves the result in the root project folder.  To recreate this analysis, the number of cores in the function `reduce_parallel()` can be changed to match your requirements and the hard-coded directories in that function can be changed as well.
+
+Since this analysis takes a few hours, I saved the consolidated files to the data directory, divided by patient to make sure the computation did not run out of RAM.
+
+The model can be run using `model.py`
+
+The figures present in this file can be recreated by running `visualizations.py`
 
 ## Acknowledgements
 

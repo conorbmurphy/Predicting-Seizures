@@ -354,14 +354,14 @@ if __name__ == '__main__':
     a_df, b_df, c_df, a_test, b_test, c_test = import_data(separate=True)
 
     com = Models('combined', df_concat, test_concat)
-    # am = Models('A', a_df, a_test)
-    # bm = Models('B', b_df, b_test)
-    # cm = Models('C', c_df, c_test)
+    am = Models('A', a_df, a_test)
+    bm = Models('B', b_df, b_test)
+    cm = Models('C', c_df, c_test)
 
     com.fit()
-    # am.fit()
-    # bm.fit()
-    # cm.fit()
+    am.fit()
+    bm.fit()
+    cm.fit()
 
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
