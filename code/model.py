@@ -139,7 +139,7 @@ class Models(object):
         self.models.append(model)
     	self.predictions.append(prediction)
 
-    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	# self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
 
     def random_forest(self):
@@ -157,7 +157,7 @@ class Models(object):
        	self.models.append(model)
     	self.predictions.append(prediction)
 
-    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	# self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def xgb_static(self):
         dtrain = xgb.DMatrix(self.X_train, self.y_train)
@@ -181,8 +181,8 @@ class Models(object):
         self.model_scores.append(score)
     	self.predictions.append(prediction)
 
-    	test_set = xgb.DMatrix(self.test_set)
-    	self.predictions_test_set.append(model.predict(test_set))
+    	# test_set = xgb.DMatrix(self.test_set)
+    	# self.predictions_test_set.append(model.predict(test_set))
 
     def xgb_grid_search(self):
         cv_params = {'max_depth': [1, 2, 3, 5, 7],
@@ -227,7 +227,7 @@ class Models(object):
     	self.model_scores.append(score)
     	self.predictions.append(prediction)
 
-    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	# self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def svm_linear(self):
         y_train = (self.y_train * 2) - 1
@@ -246,7 +246,7 @@ class Models(object):
     	self.model_scores.append(score)
     	self.predictions.append(prediction)
 
-    	self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
+    	# self.predictions_test_set.append(model.predict_proba(self.test_set)[:,1])
 
     def svm_grid_search(self):
         y_train = (self.y_train * 2) - 1
