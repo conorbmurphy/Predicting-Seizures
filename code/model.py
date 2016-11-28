@@ -49,7 +49,7 @@ class Models(object):
             4) removing zeros (if helpful)
     	'''
     	print '-------- Beginning Transformation --------'
-        # self.remove_zeros() # does this cause a reduction in the score?
+        self.remove_zeros() # does this cause a reduction in the score?
     	self.tt_split()
     	self.normalize_and_add_dummies()
     	print '-------- Tranformation Complete --------'
