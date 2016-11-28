@@ -173,8 +173,8 @@ class Features(object):
             Saves 16 channel entropies to self.entropies, zeros if empty dataset
         '''
         entropies = []
-	length = self.temp_mat2.shape[0]/1E3
-	try:
+	    length = self.temp_mat2.shape[0]/1E5
+	    try:
 	        for col in range(16):
 	            kde = gaussian_kde(self.temp_mat2[:,col])
 	            r = np.linspace(min(self.temp_mat2[:,col]),\
@@ -274,7 +274,12 @@ def Feature_wrapper(path):
     '''
     try:
         a = Features(path)
-        return a.return_results()
+        result = a.return_results()
+        print 'Returning {} with shape {}'.format(path, result.shape)
+        if (result.shape == (1, 821)) or (result.shape == (1, 818)):
+            return result
+        else:
+            return (np.ones(821)*-1).reshape(-1,1)
     except:
         print 'Unexpected error on {}'.format(path)
         return (np.ones(821)*-1).reshape(-1,1)
