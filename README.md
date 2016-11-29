@@ -3,7 +3,7 @@
 
 ## Summary
 
-While it has long been known that the brain changes state before the onset of a seizure, no reliable clinical application has been developed to forecast seizures until recently.  The world's first clinical trial of this technology is the implantable NeuroVista Seizure Advisory System that employs long-term intracranial electroencephalography (iEEG) to record brain activity linked to drug-resistant, persistent epilepsy.  Forecasting seizures allows patients the opportunity to take fast-acting medications or avoid dangerous activities in addition to reducing the anxieties surrounding epileptic events.  This project addresses the most difficult aspect of seizure forecasting by classifying 10-minute recordings as either interictal (baseline) or preictal (prior to seizure) events.  I found that an ensemble method using logistic regression, gradient boosting, random forest and support vector machines gave me the best results of a .82 area under the ROC curve.
+While it has long been known that the brain changes state before the onset of a seizure, no reliable clinical application has been developed to forecast seizures until recently.  The world's first clinical trial of this technology is the implantable NeuroVista Seizure Advisory System that employs long-term intracranial electroencephalography (iEEG) to record brain activity linked to drug-resistant, persistent epilepsy.  Forecasting seizures allows patients the opportunity to take fast-acting medications or avoid dangerous activities in addition to reducing the anxieties surrounding epileptic events.  This project addresses the most difficult aspect of seizure forecasting by classifying 10-minute recordings as either interictal (baseline) or preictal (prior to seizure) events.  I tested four models finding that gradient boosting and random forest both result in a .91 area under the ROC curve on my validation set.
 
 ## Data
 
@@ -102,15 +102,16 @@ Dimensionality reduction
 Imbalanced classes
 ROC curves
 
-The scoring metric I decided to use with area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  Both results are included below:
+The scoring metric I decided to use with area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  Both results are included below with the format (cross validated score / validation score):
 
-| Patient    | Logistic Regression | Random Forest | XGBoost | SVM   |
-| ---------- |:-------------------:|:-------------:|:-------:|:-----:|
-| Combined   | 0.84                | 0.88          | 0.87    | 0.84  |
-| A          | 0.80                | 0.86          | 0.90    | 0.85  |
-| B          | 0.84                | 0.83          | 0.83    | 0.82  |
-| C          | 0.86                | 0.91          | 0.94    | 0.87  |
+| Patient    | Logistic Regression | Random Forest | XGBoost^ | SVM          |
+| ---------- |:-------------------:|:-------------:|:--------:|:------------:|
+| Combined   | 0.81 / 0.88         | 0.88 / 0.91   | 0.91     | 0.84 / 0.87  |
+| A          | 0.84 / 0.85         | 0.85 / 0.90   | 0.90     | 0.84 / 0.87  |
+| B          | 0.90 / 0.88         | 0.85 / 0.86   | 0.88     | 0.87 / 0.90  |
+| C          | 0.86 / 0.85         | 0.91 / 0.93   | 0.93     | 0.87 / 0.87  |
 
+^ XGBoost was not cross-validated
 
 ## Reproducing my Analysis
 
@@ -123,6 +124,8 @@ The model can be run using `model.py`
 The figures present in this file can be recreated by running `visualizations.py`
 
 ## Next steps
+
+The models that took into account feature interaction such as random forest and gradient boosting outperformed logistic regression substantially.  Since logistic regression does not account for feature interaction, there is likely missed, non-linear relations that accounts for this difference in scores.  In future models, this can be accounted for with interaction terms or with dimensionality reduction using non-negative matrix factorization (which has been shown to account for correlations better than principal component analysis).
 
 Considering that the data set only includes base iEEG recordings, there are a few steps that could create a more accurate prediction by using side data.
 
