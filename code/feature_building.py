@@ -33,13 +33,19 @@ class Features(object):
         self.fit()
 
     def fit(self):
+        '''
+        INPUT: None
+        OUTPUT: None
+            Runs load file, saves True if loaded data is empty, and saves
+                medatadata
+        '''
         print 'Fitting {}'.format(self.file_name)
         self.load_file()
 
         if self.temp_mat[0].sum() != 0:
-		          self.isempty = True
+            self.isempty = True
 
-	    self.metadata()
+        self.metadata()
 
 
     def load_file(self):
@@ -303,12 +309,12 @@ def reduce_parallel():
     '''
     to run on aws, change pool and paths
     '''
-    params = [('1', '/data/train_1', 'train', 'data/a_reduced17.csv'),
-            ('2', '/data/train_2', 'train', 'data/b_reduced17.csv'),
-            ('3', '/data/train_3', 'train', 'data/c_reduced17.csv'),
-            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced17.csv'),
-            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced17.csv'),
-            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced17.csv')]
+    params = [('1', '/data/train_1', 'train', 'data/a_reduced18.csv'),
+            ('2', '/data/train_2', 'train', 'data/b_reduced18.csv'),
+            ('3', '/data/train_3', 'train', 'data/c_reduced18.csv'),
+            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced18.csv'),
+            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced18.csv'),
+            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced18.csv')]
     files = [listdir(param[1]) for param in params]
     files[0].remove('1_45_1.mat') # removes corrupt file
     paths = [param[1] for param in params]

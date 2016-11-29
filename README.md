@@ -69,13 +69,15 @@ A wavelet spectrogram demonstrates which wavelengths are active for interictal a
 
 ![Preictal Wavelet Spectrogram](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/spectrogram_p.png)
 
-### Channel Correlation
+### Pearson Channel Correlation
 
 ![Interictal Channel Correlations](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/coorelations_i.png)
 
 ![Preictal Channel Correlations](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/coorelations_p.png)
 
 ### Entropy
+
+Shannon entropy offers an assessment of irregularity in the EEG recordings.  A kernel density estimation estimates the probability distribution of seeing given observations in each channel for each recording.  With this estimation, I computed this measure of irregularity.
 
 VISUALIZE ENTROPY
 
@@ -100,9 +102,7 @@ Dimensionality reduction
 Imbalanced classes
 ROC curves
 
-Scores were calculated using 5-fold cross-validation on the area under the ROC curve.  The results are as follows.
-
-Pull scores for validation set
+The scoring metric I decided to use with area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  Both results are included below:
 
 | Patient    | Logistic Regression | Random Forest | XGBoost | SVM   |
 | ---------- |:-------------------:|:-------------:|:-------:|:-----:|
