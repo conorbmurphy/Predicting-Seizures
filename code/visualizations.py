@@ -11,6 +11,7 @@ from scipy.io import loadmat
 from scipy import signal
 import multiprocessing
 from code.model import import_data
+from sklearn.metrics import roc_curve, auc
 
 
 def file_names(patient_no):
@@ -142,49 +143,75 @@ def plot_correlations(mat, title, name):
     plt.suptitle(title)
     plt.savefig(name)
 
-if __name__ == '__main__':
-    interictal, preictal = file_names(1)
-    i_compiled, p_compiled = compile_files(interictal, preictal)
+def plot_ROC_curve(predictions, name):
+    '''
+    INPUT: predictions (probabilities) and name of destination file
+    OUTPUT: None, saves plot
+    '''
+    pred = predictions.copy()
+    y = pred.pop(pred.columns[-1])
+    plt.figure(figsize=(10, 5))
+    lw = 1.5
+    for model in pred:
+        fpr, tpr, roc_auc = dict(), dict(), dict()
+        fpr, tpr, _ = roc_curve(y, pred[model])
+        roc_auc = auc(fpr, tpr)
+        plt.plot(fpr, tpr, lw=lw, label=model)
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic for Validation Predictions')
+    plt.legend(loc="lower right")
+    plt.savefig(name)
 
-    df_concat, test_concat = import_data()
+if __name__ == '__main__':
+    # interictal, preictal = file_names(1)
+    # i_compiled, p_compiled = compile_files(interictal, preictal)
+    #
+    # df_concat, test_concat = import_data()
 
     feature_importances = pd.read_csv('data/feature_importances.csv')
+    predictions = pd.read_csv('data/predictions_for_roc_curve.csv')
 
-    #plot_segments(i_compiled,
-    #    'One Hour Interictal (Baseline) Recording',
-    #    'b',
-    #    'figures/interictal.png')
-
-    #plot_segments(p_compiled,
-    #    'One Hour Preictal (pre-seizure) Recording',
-    #    'r',
-    #    'figures/preictal.png')
-
-    plot_feature_importance(feature_importances,
-        'figures/feature_importance.png')
-
-    #plot_kde(i_compiled.flatten(),
-    #    p_compiled.flatten(),
-    #    'Kernel Density Plot of One Hour Recording Pre- and Interictal',
-    #    'figures/kde.png')
-
-    #plot_channel_kde(i_compiled,
-    #    p_compiled,
-    #    'Kernel Density Plots by Channel Pre- and Interictal',
-    #    'figures/kde2.png')
-
-    #wavelet_spectrogram(i_compiled,
-    #    'Interictal Wavelet Spectrogram from Channel 16',
-    #    'figures/spectrogram_i.png')
-
+   #  plot_segments(i_compiled,
+   #     'One Hour Interictal (Baseline) Recording',
+   #     'b',
+   #     'figures/interictal.png')
+   #
+   #  plot_segments(p_compiled,
+   #     'One Hour Preictal (pre-seizure) Recording',
+   #     'r',
+   #     'figures/preictal.png')
+   #
+   #  plot_feature_importance(feature_importances,
+   #      'figures/feature_importance.png')
+   #
+   #  plot_kde(i_compiled.flatten(),
+   #     p_compiled.flatten(),
+   #     'Kernel Density Plot of One Hour Recording Pre- and Interictal',
+   #     'figures/kde.png')
+   #
+   #  plot_channel_kde(i_compiled,
+   #     p_compiled,
+   #     'Kernel Density Plots by Channel Pre- and Interictal',
+   #     'figures/kde2.png')
+   #
+   #  wavelet_spectrogram(i_compiled,
+   #     'Interictal Wavelet Spectrogram from Channel 16',
+   #     'figures/spectrogram_i.png')
+   #
    # wavelet_spectrogram(p_compiled,
    #     'Preictal Wavelet Spectrogram from Channel 16',
    #     'figures/spectrogram_p.png')
-
+   #
    # plot_correlations(i_compiled,
    #     'Interictal Channel Coorelations',
    #     'figures/coorelations_i.png')
-
+   #
    # plot_correlations(p_compiled,
    #     'Precital Channel Coorelations',
    #     'figures/coorelations_p.png')
+
+    plot_ROC_curve(predictions, 'figures/roc_curve.png')

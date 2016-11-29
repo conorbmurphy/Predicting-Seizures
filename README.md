@@ -1,4 +1,4 @@
-# Forecasting Seizures with Long-Term iEEG Recordings
+# Predicting Seizures with Long-Term iEEG Recordings
 ### By Conor B. Murphy
 
 ## Summary
@@ -81,7 +81,7 @@ Shannon entropy offers an assessment of irregularity in the EEG recordings.  A k
 
 VISUALIZE ENTROPY
 
-### Method of Moments
+### Method of Moments and Channel Means
 
 In addition to the above, I calculated variations on the method of moments including the following:
 
@@ -94,13 +94,16 @@ In addition to the above, I calculated variations on the method of moments inclu
 
 ## Modeling
 
-After building the features described above, I built a model that took int account unbalanced classes (around 90% of the data is interictal), missing data and normalization.
+After building the features described above, I built a model that took into account unbalanced classes (around 90% of the data is interictal), missing data, encoding the categorical variable for patient number and normalization.
 
-Modeling on just the last segment-how did that work?
-Techniques tried - RF, SVM, LR, XGB
-Dimensionality reduction
-Imbalanced classes
-ROC curves
+I tried the following techniques:
+
+1. *Logistic Regression:* using L1 regularization due to high dimensionality of data set
+2. *Random Forest*
+3. *Gradient Boosting:* I used the XGBoost implementation with nominal adjustments
+4. *SVM:* Using both Radial Basis Function (RBF) and linear kernels.  I tried a linear kernel to reduce overfitting however the RBF still outperformed it.
+
+![ROC Curve](https://github.com/conorbmurphy/Predicting-Seizures/blob/master/figures/roc_curve.png)
 
 The scoring metric I decided to use with area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  Both results are included below with the format (cross validated score / validation score):
 
@@ -133,7 +136,7 @@ Considering that the data set only includes base iEEG recordings, there are a fe
 2. A callibration protocol could allow the users with similar brain activity to be clustered.  For instance, this could be accomplished by asking them to perform certain mental tasks in order to get a better idea for what the range of their baseline, normal brain activity.
 3. Using activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
 
-In addition to the models I tried, convolutional neural nets have been shown to be effective with this type of data.  Experimenting with other wavelets such as the Morlet could also yeild different results in the wavelet transformation.  A draft function to be used Scipy's `cwt()` function can be called with `from code.model import morlet`
+In addition to the models I tried, convolutional neural nets have been shown to be effective with this type of data.  Experimenting with other wavelets such as the Morlet and the 3hz 'spike-and-wave' common in preict recordings could also yeild different results in the wavelet transformation.  A draft function to be used Scipy's `cwt()` function can be called with `from code.model import morlet`
 
 
 
