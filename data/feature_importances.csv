@@ -1,7 +1,7 @@
-,Feature,Value
-0,Wavelet Transforms,0.468648862049
-1,Pearson Corrleation,0.199205333407
-2,Method of Moments,0.171076522278
-3,Channel Means,0.145529705999
-4,Entropy Calculations,0.0146142345593
-5,Patient Numbers,0.00092534170758
+Feature,Value
+Wavelet Transforms,0.466030916159
+Pearson Corrleation,0.198409128812
+Method of Moments,0.174503619938
+Channel Means,0.1461219335
+Entropy Calculations,0.0142042703545
+Patient Numbers,0.00073013123713

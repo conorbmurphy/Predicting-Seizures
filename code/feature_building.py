@@ -45,7 +45,7 @@ class Features(object):
         if self.temp_mat[0].sum() != 0:
             self.isempty = True
 
-        self.metadata()
+	self.metadata()
 
 
     def load_file(self):
@@ -194,7 +194,7 @@ class Features(object):
                 delt = r[1] - r[0]
                 entropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
     			# entropies.append(entropy(kde.evaluate(r)))
-    	    return np.array(entropies).reshape(1,-1)
+    	        return np.array(entropies).reshape(1,-1)
     	except ValueError:
     		return np.zeros(16).reshape(1, -1)
 
@@ -221,8 +221,8 @@ class Features(object):
         OUTPUT: Combined results
         '''
         try:
-            if self.clas:
-			    result = np.concatenate([\
+		if self.clas:
+			result = np.concatenate([\
 				    self.channel_means(),
     				self.wavelet_transformation(),
      				self.method_of_moments(),
@@ -234,7 +234,7 @@ class Features(object):
     					self.sequence,
     					self.contaminated,
     					self.clas]).reshape(1,-1)], axis=1)
-    			return result.flatten().reshape(1,-1)
+			return result.flatten().reshape(1,-1)
 		elif self.isempty == False:
 		        result = np.concatenate([\
 				            self.channel_means(),
@@ -246,10 +246,10 @@ class Features(object):
                         		self.patient,
                         		self.id]).reshape(1,-1)], axis=1)
 		        return result.flatten().reshape(1,-1)
-		elif self.istest == False:
+	        elif self.istest == False:
 			    return (np.ones(821)*-1).reshape(1,-1)
-        else:
-                return (np.ones(818)*-1).reshape(1,-1)
+                else:
+             		return (np.ones(818)*-1).reshape(1,-1)
         except (ValueError, TypeError):
         	print 'Unable to process {} due to ValueError or TypeError, returning negative ones'\
                 .format(self.file_name)
