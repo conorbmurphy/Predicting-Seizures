@@ -387,7 +387,12 @@ if __name__ == '__main__':
     bm.fit()
     cm.fit()
 
-    com.get_feature_importances('data/feature_importances.csv')
+    # com.get_feature_importances('data/feature_importances.csv')
+
+    predictions = pd.DataFrame(com.predictions[:4]).transpose()
+    predictions.columns = ['Logistic_Regression', 'Random_Forest', 'XGBoost', 'SVM']
+    predictions['y_true'] = com.y_test
+    predictions.to_csv('data/predictions_for_roc_curve.csv', index=False)
 
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
 
