@@ -5,7 +5,7 @@ from os import listdir
 import pandas as pd
 from scipy import signal
 from scipy.io import loadmat
-from scipy.stats import kurtosis, skew, pearsonr, gaussian_kde
+from scipy.stats import kurtosis, skew, pearsonr, gaussian_kde, entropy
 
 
 class Features(object):
@@ -43,7 +43,7 @@ class Features(object):
         print 'Fitting {}'.format(self.file_name)
         self.load_file()
 
-        if self.file_namea.split('/')[-1].split('_')[0] == 'new':
+        if self.file_name.split('/')[-1].split('_')[0] == 'new':
             self.istest = True
 
         if self.temp_mat[0].sum() != 0:
@@ -192,10 +192,11 @@ class Features(object):
     	try:
         	for col in range(16):
             	  kde = gaussian_kde(self.temp_mat2[:,col])
-                  r = np.linspace(min(self.temp_mat2[:,col]),\
-                        max(self.temp_mat2[:,col]), 20)
+                  r = np.linspace(np.min(self.temp_mat2[:,col]),\
+                        np.max(self.temp_mat2[:,col]), 20)
                   delt = r[1] - r[0]
-                  entropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
+                  entropies.append(entropy(kde.pdf(r)*delt))
+                  #ientropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
         	return np.array(entropies).reshape(1,-1)
     	except ValueError: # in case of all zeros
     		return (np.ones(16)*-1).reshape(1, -1)
@@ -259,19 +260,14 @@ class Features(object):
         INPUT: None
         OUTPUT: Returns either test or training compelation
         '''
-        try:
-		if self.istest == False:
-			return self.return_train()
-		elif self.isempty == False:
-			return self.return_test()
-		elif self.istest == True:
-			return (np.ones(818)*-1).reshape(1,-1)
-		else:
-			return (np.ones(821)*-1).reshape(1,-1)
-        except:
-        	print 'Unable to process {} due to an unknown error, returning negative ones'\
-                .format(self.file_name)
-        	return (np.ones(821)*-1).reshape(1,-1)
+	if self.istest == False:
+		return self.return_train()
+	elif (self.isempty == False) and self.istest == True:
+		return self.return_test()
+	elif self.istest == True:
+		return (np.ones(818)*-1).reshape(1,-1)
+	else:
+		return (np.ones(821)*-1).reshape(1,-1)
 
 
     def _return_frequencies(self):
