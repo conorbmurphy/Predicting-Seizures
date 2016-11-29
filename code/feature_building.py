@@ -242,16 +242,16 @@ class Features(object):
         INPUT: None
         OUTPUT: 1x818 numpy array of compiled test data
         '''
-		result = np.concatenate([\
-                    self.channel_means(),
-                    self.wavelet_transformation(),
-                    self.method_of_moments(),
-                    self.entropize(),
-                    self.correlate(),
-                    np.array([\
-                        self.patient,
-                        self.id]).reshape(1,-1)], axis=1)
-		return result.flatten().reshape(1,-1)
+	result = np.concatenate([\
+                   self.channel_means(),
+                   self.wavelet_transformation(),
+                   self.method_of_moments(),
+                   self.entropize(),
+                   self.correlate(),
+                   np.array([\
+                       self.patient,
+                       self.id]).reshape(1,-1)], axis=1)
+	return result.flatten().reshape(1,-1)
 
 
     def return_results(self):
@@ -260,14 +260,14 @@ class Features(object):
         OUTPUT: Returns either test or training compelation
         '''
         try:
-    		if self.istest == False:
-                return self.return_train()
-		    elif self.isempty == False:
-		        return self.return_test()
-            elif self.istest == True:
-                return (np.ones(818)*-1).reshape(1,-1)
-            else:
-                return (np.ones(821)*-1).reshape(1,-1)
+		if self.istest == False:
+			return self.return_train()
+		elif self.isempty == False:
+			return self.return_test()
+		elif self.istest == True:
+			return (np.ones(818)*-1).reshape(1,-1)
+		else:
+			return (np.ones(821)*-1).reshape(1,-1)
         except:
         	print 'Unable to process {} due to an unknown error, returning negative ones'\
                 .format(self.file_name)
@@ -352,7 +352,7 @@ if __name__ == '__main__':
     errors = []
     label = return_labels()
 
-    # reduce_parallel()
+    reduce_parallel()
 
     print 'Errors in fitting {} files'.format(len(errors))
     for error in errors:
