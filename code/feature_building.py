@@ -11,6 +11,7 @@ from scipy.stats import kurtosis, skew, pearsonr, gaussian_kde
 class Features(object):
     def __init__(self, file_name):
         self.file_name = file_name
+        self.istest = False
 
         self.temp_mat = None # Full recording
         self.temp_mat2 = None # Non-zero values from temp_mat
@@ -41,6 +42,9 @@ class Features(object):
         '''
         print 'Fitting {}'.format(self.file_name)
         self.load_file()
+
+        if self.file_namea.split('/')[-1].split('_')[0] == 'new':
+            self.istest = True
 
         if self.temp_mat[0].sum() != 0:
             self.isempty = True
@@ -85,9 +89,9 @@ class Features(object):
     def channel_means(self):
         '''
         INPUT: None
-        OUTPUT: None
-            Divides the sample into 10 segments and aves a 1x160 numpy array of
-            the channel means of all non-zero values to self.means()
+        OUTPUT: 1x160 numpy array
+            Divides the sample into 10 segments and returns  a 1x160 numpy array
+            of the channel means of all non-zero values to self.means()
         '''
         start = 0
         result = np.array([])
@@ -107,7 +111,7 @@ class Features(object):
     def wavelet_transformation(self):
         '''
         INPUT: None
-        OUTPUT: None
+        OUTPUT: 1x400 numpy array
             Performs a wavelet transformation using 25 freqencies of the
             Ricker wave on each channel, saving the means of the squared result.
             This returns a 1x400 numpy array, 25 values for each channel
@@ -175,34 +179,32 @@ class Features(object):
                             median_total]).flat).reshape(1,-1)
 
         else:
-            return np.zeros(118).reshape(1, -1) # BE CAREFUL WITH THIS
+            return (np.ones(118)*-1).reshape(1, -1) # BE CAREFUL WITH THIS
 
 
     def entropize(self):
         '''
-       INPUT: None
-        OUTPUT: None
+        INPUT: None
+        OUTPUT: 1x16 numpy array
             Saves 16 channel entropies to self.entropies, zeros if empty dataset
         '''
         entropies = []
-    	# length = self.temp_mat2.shape[0]/1E5
     	try:
-    		for col in range(16):
-    			kde = gaussian_kde(self.temp_mat2[:,col])
-    			r = np.linspace(min(self.temp_mat2[:,col]),\
-    	                max(self.temp_mat2[:,col]), 20)
-                delt = r[1] - r[0]
-                entropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
-    			# entropies.append(entropy(kde.evaluate(r)))
-    	        return np.array(entropies).reshape(1,-1)
-    	except ValueError:
-    		return np.zeros(16).reshape(1, -1)
+        	for col in range(16):
+            	  kde = gaussian_kde(self.temp_mat2[:,col])
+                  r = np.linspace(min(self.temp_mat2[:,col]),\
+                        max(self.temp_mat2[:,col]), 20)
+                  delt = r[1] - r[0]
+                  entropies.append((kde.pdf(r)*np.log(kde.pdf(r))).sum()*delt)
+        	return np.array(entropies).reshape(1,-1)
+    	except ValueError: # in case of all zeros
+    		return (np.ones(16)*-1).reshape(1, -1)
 
 
     def correlate(self):
         '''
         INPUT: None
-        OUTPUT: None
+        OUTPUT: 1x122 numpy array
             Saves 120 combinations of channel pearson correlations, their mean
             and variance
         '''
@@ -215,43 +217,59 @@ class Features(object):
         return np.hstack([np.array(correlations), corr_mean, corr_var]).reshape(1,-1)
 
 
+    def return_train(self):
+        '''
+        INPUT: None
+        OUTPUT: 1x821 numpy array of compiled train data
+        '''
+        result = np.concatenate([\
+        		    self.channel_means(),
+        			self.wavelet_transformation(),
+        			self.method_of_moments(),
+        			self.entropize(),
+        			self.correlate(),
+        			np.array([\
+        				self.patient,
+        				self.id,
+        				self.sequence,
+        				self.contaminated,
+        				self.clas]).reshape(1,-1)], axis=1)
+        return result.flatten().reshape(1,-1)
+
+
+    def return_test(self):
+        '''
+        INPUT: None
+        OUTPUT: 1x818 numpy array of compiled test data
+        '''
+		result = np.concatenate([\
+                    self.channel_means(),
+                    self.wavelet_transformation(),
+                    self.method_of_moments(),
+                    self.entropize(),
+                    self.correlate(),
+                    np.array([\
+                        self.patient,
+                        self.id]).reshape(1,-1)], axis=1)
+		return result.flatten().reshape(1,-1)
+
+
     def return_results(self):
         '''
         INPUT: None
-        OUTPUT: Combined results
+        OUTPUT: Returns either test or training compelation
         '''
         try:
-		if self.clas:
-			result = np.concatenate([\
-				    self.channel_means(),
-    				self.wavelet_transformation(),
-     				self.method_of_moments(),
-    				self.entropize(),
-    				self.correlate(),
-    				np.array([\
-    					self.patient,
-    					self.id,
-    					self.sequence,
-    					self.contaminated,
-    					self.clas]).reshape(1,-1)], axis=1)
-			return result.flatten().reshape(1,-1)
-		elif self.isempty == False:
-		        result = np.concatenate([\
-				            self.channel_means(),
-                    		self.wavelet_transformation(),
-                    		self.method_of_moments(),
-                    		self.entropize(),
-                    		self.correlate(),
-				            np.array([\
-                        		self.patient,
-                        		self.id]).reshape(1,-1)], axis=1)
-		        return result.flatten().reshape(1,-1)
-	        elif self.istest == False:
-			    return (np.ones(821)*-1).reshape(1,-1)
-                else:
-             		return (np.ones(818)*-1).reshape(1,-1)
-        except (ValueError, TypeError):
-        	print 'Unable to process {} due to ValueError or TypeError, returning negative ones'\
+    		if self.istest == False:
+                return self.return_train()
+		    elif self.isempty == False:
+		        return self.return_test()
+            elif self.istest == True:
+                return (np.ones(818)*-1).reshape(1,-1)
+            else:
+                return (np.ones(821)*-1).reshape(1,-1)
+        except:
+        	print 'Unable to process {} due to an unknown error, returning negative ones'\
                 .format(self.file_name)
         	return (np.ones(821)*-1).reshape(1,-1)
 
@@ -334,7 +352,7 @@ if __name__ == '__main__':
     errors = []
     label = return_labels()
 
-    reduce_parallel()
+    # reduce_parallel()
 
     print 'Errors in fitting {} files'.format(len(errors))
     for error in errors:
