@@ -33,6 +33,7 @@ class Features(object):
 
         self.fit()
 
+
     def fit(self):
         '''
         INPUT: None

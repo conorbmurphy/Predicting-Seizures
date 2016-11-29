@@ -1,18 +1,18 @@
 
-from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict
+from os import listdir
 import pandas as pd
+from scipy.io import loadmat
+from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, auc, roc_curve
+from sklearn.model_selection import GridSearchCV, train_test_split, cross_val_score
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg') # for use on AWS
 import matplotlib.pyplot as plt
-from os import listdir
-from scipy.io import loadmat
 import numpy as np
 import xgboost as xgb
-from sklearn.model_selection import GridSearchCV, GroupKFold
-from sklearn import svm
+
 
 class Models(object):
     def __init__(self, patient, data, test_set):
@@ -94,15 +94,16 @@ class Models(object):
     	'''
     	X_train_patient = self.X_train[:,-1]
     	X_test_patient = self.X_test[:,-1]
-    	#test_set_patient = self.test_set[:,-1]
+    	test_set_patient = self.test_set[:,-1]
 
     	self.X_train = ((self.X_train - self.X_train.mean(axis=0)) / self.X_train.std(axis=0))[:,:-1]
     	self.X_test = ((self.X_test - self.X_test.mean(axis=0)) / self.X_test.std(axis=0))[:,:-1]
-    	#self.test_set = ((self.test_set - self.test_set.mean(axis=0)) / self.test_set.std(axis=0))[:,:-1]
+    	self.test_set = ((self.test_set - self.test_set.mean(axis=0)) /
+            self.test_set.std(axis=0))[:,:-1]
 
     	self.X_train = np.concatenate([self.X_train, pd.get_dummies(X_train_patient)], axis=1)
     	self.X_test = np.concatenate([self.X_test, pd.get_dummies(X_test_patient)], axis=1)
-    	#self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
+    	self.test_set = np.concatenate([self.test_set, pd.get_dummies(test_set_patient)], axis=1)
         print '-------- Normalization and Dummy Adding Complete --------'
 
 
@@ -388,12 +389,10 @@ if __name__ == '__main__':
     cm.fit()
 
     # com.get_feature_importances('data/feature_importances.csv')
-
-    predictions = pd.DataFrame(com.predictions[:4]).transpose()
-    predictions.columns = ['Logistic_Regression', 'Random_Forest', 'XGBoost', 'SVM']
-    predictions['y_true'] = com.y_test
-    predictions.to_csv('data/predictions_for_roc_curve.csv', index=False)
-
+    #
+    # predictions = pd.DataFrame(com.predictions[:4]).transpose()
+    # predictions.columns = ['Logistic_Regression', 'Random_Forest', 'XGBoost', 'SVM']
+    # predictions['y_true'] = com.y_test
+    # predictions.to_csv('data/predictions_for_roc_curve.csv', index=False)
+    #
     # create_submission(cm.predictions_test_set[0], 'data/prediction20.csv')
-
-    # b.plot_ROC(b.models)
