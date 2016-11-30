@@ -126,8 +126,8 @@ def wavelet_spectrogram(mat, title, name):
     '''
     plt.figure(figsize=(10, 5))
     freq = return_frequencies()
-    result = signal.cwt(mat[:,15], signal.ricker, freq)
-    plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='PRGn',\
+    result = signal.cwt(mat[:,0], signal.ricker, freq)
+    plt.imshow(result, extent=[0, 1440000, 2, 300], cmap='hot',\
         aspect='auto', vmax=abs(result).max(), vmin=-abs(result).max())
     plt.suptitle(title)
     plt.xlabel('Time (observations sampled at 400 hz)')
@@ -191,14 +191,14 @@ if __name__ == '__main__':
 
     plot_feature_importance(feature_importances,
         'figures/feature_importance.png')
-   
+
 
     wavelet_spectrogram(i_compiled,
-       'Interictal Wavelet Spectrogram from Channel 16',
+       'Interictal Wavelet Spectrogram from Channel 1',
        'figures/spectrogram_i.png')
 
    wavelet_spectrogram(p_compiled,
-       'Preictal Wavelet Spectrogram from Channel 16',
+       'Preictal Wavelet Spectrogram from Channel 1',
        'figures/spectrogram_p.png')
 
    plot_correlations(i_compiled,
@@ -206,7 +206,7 @@ if __name__ == '__main__':
        'figures/coorelations_i.png')
 
    plot_correlations(p_compiled,
-       'Precital Channel Coorelations',
+       'Preictal Channel Coorelations',
        'figures/coorelations_p.png')
 
     plot_ROC_curve(predictions, 'figures/roc_curve.png')

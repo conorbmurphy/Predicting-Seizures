@@ -299,7 +299,7 @@ class Models(object):
         fi_wav = ('Wavelet Transforms', fi[160:560].sum()) # 400 wavelet transformations
         fi_mom = ('Method of Moments', fi[560:678].sum()) # 118 MOM calcuations
         fi_ent = ('Entropy Calculations', fi[678:694].sum()) # 16 entropy
-        fi_cor = ('Pearson Corrleation', fi[694:816].sum()) # 122 correlations
+        fi_cor = ('Pearson Correleation', fi[694:816].sum()) # 122 correlations
         fi_pat = ('Patient Numbers', fi[816:].sum()) # 3 patient number dummies
 
         df = pd.DataFrame([fi_avg, fi_wav, fi_mom, fi_ent, fi_cor, fi_pat],\
