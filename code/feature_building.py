@@ -67,8 +67,7 @@ class Features(object):
         if self.file_name.split('/')[-1].split('_')[0] == 'new':
             self.istest = True
 
-        if self.temp_mat[0].sum() != 0:
-            self.isempty = True
+        self.isempty = self.temp_mat[0].sum() == 0
 
 	self.metadata()
 
@@ -283,7 +282,7 @@ class Features(object):
         '''
 	if self.istest == False:
 		return self.return_train()
-	elif (self.isempty == False) and self.istest == True:
+	elif (self.isempty == False) and (self.istest == True):
 		return self.return_test()
 	elif self.istest == True:
 		return (np.ones(818)*-1).reshape(1,-1)
@@ -377,7 +376,6 @@ if __name__ == '__main__':
             ('1', '/data/test_1_new', 'test', 'data/a_test_reduced.csv'),
             ('2', '/data/test_2_new', 'test', 'data/b_test_reduced.csv'),
             ('3', '/data/test_3_new', 'test', 'data/c_test_reduced.csv')]
-    params = params[3:] # for operation on just test set
 
     reduce_parallel(params, n_jobs=40)
 
