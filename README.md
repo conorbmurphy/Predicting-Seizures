@@ -149,7 +149,7 @@ Considering that the data set only includes base iEEG recordings, there are a fe
 2. A calibration protocol could allow the users with similar brain activity to be clustered.  For instance, this could be accomplished by asking them to perform certain mental tasks in order to get a better idea for the range of their baseline, normal brain activity.
 3. Using activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
 
-In addition to the models I tried, convolutional neural nets have been shown to be effective with this type of data.  Experimenting with other wavelets such as the Morlet and the 3hz 'spike-and-wave' common in preictal recordings could also yeild different results in the wavelet transformation.  A draft function to be used Scipy's `cwt()` function can be called with `from code.model import morlet`
+In addition to the models I tried, convolutional neural nets have been shown to be effective with this type of data.  Experimenting with other wavelets such as the Morlet and the 3hz 'spike-and-wave' common in preictal recordings could also yield different results in the wavelet transformation.  A draft function to be used Scipy's `cwt()` function can be called with `from code.model import morlet`
 
 ## Acknowledgements
 
