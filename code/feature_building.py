@@ -9,7 +9,27 @@ from scipy.stats import kurtosis, skew, pearsonr, gaussian_kde, entropy
 
 
 class Features(object):
+    '''
+    The features class can be use to featurize an iEEG recording.  It
+    initializes with a file name to be featurized.
+
+    By calling return_results() it will return the following 817 features for
+    the training set (less for the test set as it does not have segment
+    recordings or class):
+
+        Channel Means:          0:160       160 channel means by 1 min window
+        Wavelet Transforms:     160:560     400 wavelet transformations
+        Method of Moments:      560:678     118 statistical moments
+        Entropy Calculations:   678:694     16 channel entropies
+        Pearson Correleation:   694:816     122 correlations w/ mean and var
+        Patient Numbers:        816         1 Patient number
+    '''
     def __init__(self, file_name):
+        '''
+        INPUT: string - file_name
+        OUTPUT: None
+            Creates variables and runs fit() function
+        '''
         self.file_name = file_name
         self.istest = False
 
@@ -21,7 +41,7 @@ class Features(object):
         self.clas = None
         self.contaminated = None
         self.sequence = None
-        self.istest = False # defaults to false unless changed
+        self.istest = False # defaults to False unless changed
 
         self.means = None
         self.wavelets = None
@@ -75,16 +95,16 @@ class Features(object):
             sequence (int, 1-6, where the recording appears in 1 hour segment-
                 for training set only)
         '''
-        self.patient, self.id, self.clas = self.file_name.replace('.',\
-            '_').replace('/','_').split('_')[4:7]
-        self.contaminated = self.file_name.split('/')[-1] in label
-        if self.patient == 'new': # in case of test data
-             self.patient, self.id = self.file_name.replace('.', '_')\
+        try:
+            self.patient, self.id, self.clas = self.file_name.replace('.',\
+                '_').replace('/','_').split('_')[4:7]
+            self.contaminated = self.file_name.split('/')[-1] in label
+            self.sequence = self.temp_mat[4][0][0]
+        except IndexError: # Thrown with test set
+            self.patient, self.id = self.file_name.replace('.', '_')\
                 .replace('/','_').split('_')[6:8]
-             self.clas = None # resets class as none
-             self.istest = True
-        else:
-        	self.sequence = self.temp_mat[4][0][0] # pulls sequence number (only exists in training set)
+            self.clas = None # resets class as none
+            self.istest = True
 
 
     def channel_means(self):
@@ -128,7 +148,7 @@ class Features(object):
     def method_of_moments(self):
         '''
         INPUT: None
-        OUTPUT: None
+        OUTPUT: 1x118 numpy array
             Performs the following method of moments calculations:
                 mean by channel - 16 values
                 mean for total recording - 1 value
@@ -320,16 +340,19 @@ def Feature_wrapper(path):
         errors.append(path)
 
 
-def reduce_parallel():
+def reduce_parallel(params, n_jobs=1):
     '''
-    to run on aws, change pool and paths
+    INPUT: n_jobs - int (optional) - number of cores to use
+           params - list of tuples of length 4 - list of tuples with the order
+           (patient_number(str), directory(str), test_or_train(str),
+           dest_file(str))
+    OUTPUT: None
+        Parallelizes feature building across the cores specified in n_jobs
+            and saves result in the directory 'data' (not to be confused with
+            the root directory /data)
+        To change the location of iEEG files or name of destination files,
+            revise params
     '''
-    params = [('1', '/data/train_1', 'train', 'data/a_reduced18.csv'),
-            ('2', '/data/train_2', 'train', 'data/b_reduced18.csv'),
-            ('3', '/data/train_3', 'train', 'data/c_reduced18.csv'),
-            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced18.csv'),
-            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced18.csv'),
-            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced18.csv')]
     files = [listdir(param[1]) for param in params]
     files[0].remove('1_45_1.mat') # removes corrupt file
     paths = [param[1] for param in params]
@@ -339,7 +362,7 @@ def reduce_parallel():
         dfile = dest_file[i]
         ifile = [paths[i]+'/'+file for file in files[i]]
         print 'Launching pool to construct {}'.format(dfile)
-        pool = multiprocessing.Pool(40)
+        pool = multiprocessing.Pool(n_jobs)
         output = pool.map(Feature_wrapper, ifile)
         pd.DataFrame(np.concatenate(output)).to_csv(dfile, index=False)
         print 'Saved file {}'.format(dfile)
@@ -348,9 +371,16 @@ def reduce_parallel():
 if __name__ == '__main__':
     errors = []
     label = return_labels()
+    params = [('1', '/data/train_1', 'train', 'data/a_reduced.csv'),
+            ('2', '/data/train_2', 'train', 'data/b_reduced.csv'),
+            ('3', '/data/train_3', 'train', 'data/c_reduced.csv'),
+            ('1', '/data/test_1_new', 'test', 'data/a_test_reduced.csv'),
+            ('2', '/data/test_2_new', 'test', 'data/b_test_reduced.csv'),
+            ('3', '/data/test_3_new', 'test', 'data/c_test_reduced.csv')]
+    params = params[3:] # for operation on just test set
 
-    reduce_parallel()
+    reduce_parallel(params, n_jobs=40)
 
-    print 'Errors in fitting {} files'.format(len(errors))
-    for error in errors:
-        print error
+    print '{} Errors in fitting files'.format(len(errors))
+    for i, error in enumerate(errors):
+        print 'Error 1 with file {}'.format(i, error)
