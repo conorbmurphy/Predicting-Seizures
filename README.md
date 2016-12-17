@@ -7,14 +7,14 @@ While it has long been known that the brain changes state before the onset of a 
 
 ## Data
 
-The data was provided by a [Kaggle competition](https://www.kaggle.com/c/melbourne-university-seizure-prediction) in collaboration with The University of Melbourne and other sponsors.  The data set consists of 7950 recordings from three patients totaling 40 gb of data.  Each recording is 240k observations of 16 variables, or a 10-minute recording at 400 hz of 16 channels of electrophysiological monitoring.
+The data was provided by a [Kaggle competition](https://www.kaggle.com/c/melbourne-university-seizure-prediction) in collaboration with The University of Melbourne and other sponsors.  The data set consists of 7950 recordings from three patients totaling 40 gb of data.  Each recording is 240k observations of 16 variables, or a 10-minute recording at 400 hz of 16 channels.
 
 A growing body of research has identified four stages in the lifecycle of an epileptic event:
 
 1. *Interictal:* a baseline brain state between seizures
 2. *Preictal:* the period leading up to a seizure
 3. *Ictal:* the seizure itself
-4. *Post-ictal:* a period after the seizure
+4. *Post-ictal:* a period after the seizure of elevated probability of having another seizure
 
 ![Lifecycle of an Epileptic Event](https://github.com/conorbmurphy/predicting-seizures/blob/master/figures/epileptic_lifecycle.png)
 
@@ -22,7 +22,7 @@ A growing body of research has identified four stages in the lifecycle of an epi
 
 The most challenging aspect of seizure forecasting is distinguishing between interictal and preictal activity.  The training set is labeled with a 0 for interictal and 1 for preictal, or having a seizure in the period after the recording.  The training set also includes where a given recording falls in a one-hour segment, information that is not available in the test set.
 
-The Kaggle competition suffered from data contamination issues resulting in an extension of the deadline and a significantly truncated test set, which made public leaderboard scores volatile.  There is reason to believe that even after limiting the size of the test set, data contamination issues persisted.  Rather than focus on a high Kaggle score, I redoubled my efforts on a strong model on the uncontaminated data as this creates more actionable insights.
+The Kaggle competition suffered from data contamination issues resulting in an extension of the deadline and a significantly truncated test set, which made public leaderboard scores volatile.  There is reason to believe that even after limiting the size of the test set, data contamination issues persisted.  Rather than focus on a high Kaggle score, I redoubled my efforts on a strong model on the uncontaminated data as this creates more actionable insights and prevents overfitting to a corrupted data set.
 
 ## Exploratory Analysis
 
@@ -44,7 +44,7 @@ I built features surrounding a variety of hypotheses, each will be explored in d
 
 * 160 channel means from 1-minute segments
 * 400 wavelet transformations
-* 118 method of moments calculations
+* 118 statistical moments calculations
 * 16 entropy calculations
 * 122 pearson correlations
 * 3 patient number dummies
@@ -77,6 +77,8 @@ A wavelet spectrogram demonstrates which wavelengths are active for interictal a
 
 * Figure 6: The preictal spectrogram shows the absence of higher frequency activity
 
+Though difficult to pick out, you can see some differences in the frequency of brain activity that's prevalent in interictal versus preictal brain states.  Similar to individuals suffering from chronic migraines, epileptics will sometimes feel an aura before the onset of an episode.  At the level of brain electrical activity, this is the lower frequency activity we're trying to pick out.  A Ricker wavelet (which has one peak and two troughs) was used in the wavelet transformation.  Future work could include a Morlet wavelet or an attept at creating the so-called 'spike-and-wave.'  Starter code for a Morlet wavelet is included in `model.py`
+
 ### Pearson Channel Correlation
 
 Channel correlations contributed significantly to the final model as well.  The recordings were pre-processed to take into account the difference between a given trace and surrounding traces.  Despite this, I was able to pull out insights from different channels using Pearson correlation.  Plotting the kernel density estimates from these correlations shows similar probabilities, indicating that the model is picking up on the interaction of features over the values of the correlations themselves.   An example of higher positive or negative correlations can be seen in the plots below.
@@ -95,7 +97,7 @@ Shannon entropy offers an assessment of irregularity in the EEG recordings.  A k
 
 ### Method of Moments and Channel Means
 
-In addition to the above, I calculated variations on the method of moments including the following:
+In addition to the above, I calculated variations on statistical moments including the following:
 
 1. Channel mean for the entire recording and in 1-minute segments
 2. Variance (channel and total)
@@ -109,7 +111,7 @@ After building the features described above, I built a model that took into acco
 
 I tried the following techniques:
 
-1. *Logistic Regression:* using L1 regularization due to high dimensionality of data set
+1. *Logistic Regression:* using L1 regularization due to high dimensionality of the data set
 2. *Random Forest:* with grid search to tune parameters
 3. *Gradient Boosting:* using the XGBoost implementation with nominal adjustments
 4. *SVM:* Using both Radial Basis Function (RBF) and linear kernels.  I tried a linear kernel to reduce overfitting however the RBF still outperformed it on the training and validation sets.
@@ -118,7 +120,7 @@ I tried the following techniques:
 
 * Figure 9: The ROC curves for each model shows the true positive and false positive rates for different decision thresholds
 
-The scoring metric I decided to use with area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  All analyses were done on what Kaggle was referring to as the training set since this data was labeled.  Scores on the cross-validated and validation sets are included below with the format (cross validated score / validation score):
+The scoring metric I decided to use was area under the ROC curve as this matched the Kaggle competition.  Scores were calculated using 5-fold cross-validation on the training set and a prediction on a withheld validation set.  All analyses were done on what Kaggle was referring to as the training set since this data was labeled.  Scores on the cross-validated and validation sets are included below with the format (cross validated score / validation score):
 
 | Patient    | Logistic Regression | Random Forest | XGBoost^ | SVM          |
 | ---------- |:-------------------:|:-------------:|:--------:|:------------:|
@@ -131,9 +133,9 @@ The scoring metric I decided to use with area under the ROC curve as this matche
 
 ## Reproducing my Analysis
 
-The feature building, modeling and visualization can all be recreated using the code in this repository.  I completed my work on a 40-core AWS EC2 instance to take full advantage of parallelizing the computationally demanding parts of this analysis (especially the wavelet transformations).
+The feature building, modeling and visualizations can all be recreated using the code in this repository.  I completed my work on a 40-core AWS EC2 instance (m4.10xlarge) to take full advantage of parallelizing the computationally demanding parts of this analysis (especially the wavelet transformations).
 
-The code in `feature_building.py` translates files from the root directory `/data` into six csv files: one training and one test set for each of the three patients.  It parallelizes the operation across 40 cores and saves the result in the root project folder.  To recreate this analysis, the number of cores in the function `reduce_parallel()` can be changed to match your requirements and the hard-coded directories in that function can be changed as well.  Since this analysis takes a few hours, I saved the consolidated files to the data directory, divided by patient to make sure the computation did not run out of RAM.
+The code in `feature_building.py` translates files from the root directory `/data` into six csv files: one training and one test set for each of the three patients.  It parallelizes the operation across 40 cores and saves the result in the root project folder.  To recreate this analysis, the number of cores in the function `reduce_parallel()` can be changed to match your requirements and the hard-coded directories in that function can be changed as well.  Since this analysis takes a few hours EC2, I saved the consolidated files to the data directory, divided by patient to make sure the computation did not run out of memory.
 
 The models can be run using `model.py`, which will print out the scores seen in the table above.  It also includes functions for using grid search on a few of the models as well as ROC curves.  The code in the final code block will save feature importances and probability predictions on the validation set for plots needed in `visualizations.py`
 
@@ -145,7 +147,7 @@ The models that took into account feature interaction such as random forest and 
 
 Considering that the data set only includes base iEEG recordings, there are a few steps that could create a more accurate prediction by using side data.
 
-1. A metric for the severity of a patient's epilepsy could create a more or less sensitive alert threshold.
+1. A metric for the severity of a patient's epilepsy could create a more or less sensitive alert threshold, acting as a Bayesian prior.
 2. A calibration protocol could allow the users with similar brain activity to be clustered.  For instance, this could be accomplished by asking them to perform certain mental tasks in order to get a better idea for the range of their baseline, normal brain activity.
 3. Using activity data such as motion and body position from the recording device could better classify the cause of a given brain state.
 
